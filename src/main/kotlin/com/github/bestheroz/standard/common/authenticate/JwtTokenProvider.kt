@@ -9,11 +9,12 @@ import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.LogUtils
-import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import org.springframework.util.Assert
+import reactor.core.publisher.Mono
 import java.time.Instant
 import java.util.*
 
@@ -56,26 +57,31 @@ class JwtTokenProvider(
 
     fun getId(token: String): Long = verifyToken(token).getClaim("id").asLong()
 
-    fun getOperator(token: String): UserDetails {
-        val jwt = verifyToken(token)
-        return Operator(
-            jwt.getClaim("id").asLong(),
-            jwt.getClaim("loginId").asString(),
-            jwt.getClaim("name").asString(),
-            UserTypeEnum.valueOf(jwt.getClaim("type").asString()),
-            jwt.getClaim("managerFlag").asBoolean(),
-            jwt
-                .getClaim("authorities")
-                .asList(String::class.java)
-                .stream()
-                .map { value: String -> AuthorityEnum.valueOf(value) }
-                .toList(),
-        )
+
+    fun getOperator(token: String): Mono<UserDetails> {
+        return Mono.fromCallable {
+            // JWT 토큰을 검증하고 Operator(UserDetails) 객체 생성
+            val jwt = verifyToken(token)
+            Operator(
+                jwt.getClaim("id").asLong(),
+                jwt.getClaim("loginId").asString(),
+                jwt.getClaim("name").asString(),
+                UserTypeEnum.valueOf(jwt.getClaim("type").asString()),
+                jwt.getClaim("managerFlag").asBoolean(),
+                jwt
+                    .getClaim("authorities")
+                    .asList(String::class.java)
+                    .stream()
+                    .map { value: String -> AuthorityEnum.valueOf(value) }
+                    .toList(),
+            )
+        }
     }
 
-    fun resolveAccessToken(request: HttpServletRequest): String? =
-        request.getHeader("Authorization")?.let {
-            return@resolveAccessToken it.takeIf { it.startsWith("Bearer ") }?.substring(7) ?: it
+
+    fun resolveAccessToken(request: ServerHttpRequest): String? =
+        request.headers.getFirst("Authorization")?.let {
+            it.takeIf { it.startsWith("Bearer ") }?.substring(7)
         }
 
     fun validateToken(token: String): Boolean {
