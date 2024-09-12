@@ -7,22 +7,20 @@ import com.github.bestheroz.standard.common.enums.AuthorityEnum.AuthorityEnumLis
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil.getPasswordHash
-import jakarta.persistence.Column
-import jakarta.persistence.Convert
-import jakarta.persistence.DiscriminatorValue
-import jakarta.persistence.Entity
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
-@Entity
+@Table
 @DiscriminatorValue("user")
 data class User(
-    @Column(nullable = false)
+    @Column
     var loginId: String,
     var password: String? = null,
     var token: String? = null,
-    @Column(nullable = false)
+    @Column
     var name: String,
-    @Column(nullable = false)
+    @Column
     var useFlag: Boolean,
     @Convert(converter = AuthorityEnumListConverter::class)
     @Column(columnDefinition = "json", nullable = false)
@@ -33,7 +31,7 @@ data class User(
     @Convert(converter = JsonAttributeConverter::class)
     @Column(columnDefinition = "json", nullable = false)
     var additionalInfo: Map<String, Any>,
-    @Column(nullable = false)
+    @Column
     var removedFlag: Boolean = false,
     var removedAt: Instant? = null,
 ) : IdCreatedUpdated() {

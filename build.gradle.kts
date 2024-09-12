@@ -48,13 +48,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.aspectj:aspectjweaver")
     implementation("org.apache.commons:commons-lang3")
 
     // Database
-    implementation("com.mysql:mysql-connector-j:9.0.0")
-    implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2")
+    implementation("io.asyncer:r2dbc-mysql")
 
     // AWS
     implementation("io.awspring.cloud:spring-cloud-aws-starter")

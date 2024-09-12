@@ -1,20 +1,19 @@
 package com.github.bestheroz.demo.repository
 
 import com.github.bestheroz.demo.entity.User
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.JpaRepository
+import kotlinx.coroutines.flow.Flow
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
-import java.util.*
 
 @Repository
-interface UserRepository : JpaRepository<User, Long> {
-    fun findAllByRemovedFlagIsFalse(pageable: Pageable): Page<User>
+interface UserRepository : CoroutineCrudRepository<User, Long> {
+    fun findAllByRemovedFlagIsFalse(): Flow<User>
+    fun countByRemovedFlagIsFalse(): Long
 
-    fun findByLoginIdAndRemovedFlagFalse(loginId: String): Optional<User>
+    fun findByLoginIdAndRemovedFlagFalse(loginId: String): User?
 
     fun findByLoginIdAndRemovedFlagFalseAndIdNot(
         loginId: String,
         id: Long?,
-    ): Optional<User>
+    ): User?
 }

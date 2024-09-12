@@ -1,5 +1,7 @@
 package com.github.bestheroz.demo.admin
 
+import com.github.bestheroz.demo.notice.NoticeDto
+import com.github.bestheroz.demo.notice.NoticeDto.Response.Companion.of
 import com.github.bestheroz.demo.repository.AdminRepository
 import com.github.bestheroz.standard.common.authenticate.JwtTokenProvider
 import com.github.bestheroz.standard.common.dto.ListResult
@@ -10,6 +12,9 @@ import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil.verifyPassword
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -26,25 +31,21 @@ class AdminService(
     }
 
     @Transactional(readOnly = true)
-    fun getAdminList(request: AdminDto.Request): ListResult<AdminDto.Response> =
-        adminRepository
-            .findAllByRemovedFlagIsFalse(
-                PageRequest.of(
-                    request.page - 1,
-                    request.pageSize,
-                    Sort.by("id").descending(),
-                ),
-            ).map(AdminDto.Response::of)
-            .let {
-                ListResult.of(it)
-            }
+    suspend fun getAdminList(request: AdminDto.Request): ListResult<AdminDto.Response> = ListResult(
+        page = request.page,
+        pageSize = request.pageSize,
+        total = adminRepository.countByRemovedFlagIsFalse(),
+        items = adminRepository.findAllByRemovedFlagIsFalse(
+        ).drop(request.page * request.pageSize)  // 페이징 시작점
+            .take(request.pageSize).toList().map(AdminDto.Response::of),
+    )
 
     @Transactional(readOnly = true)
-    fun getAdmin(id: Long): AdminDto.Response =
-        adminRepository
-            .findById(id)
+    suspend fun getAdmin(id: Long): AdminDto.Response {
+        val admin = adminRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
+        return admin
             .map(AdminDto.Response::of)
-            .orElseThrow { RequestException400(ExceptionCode.UNKNOWN_ADMIN) }
+    }
 
     fun createAdmin(
         request: AdminCreateDto.Request,

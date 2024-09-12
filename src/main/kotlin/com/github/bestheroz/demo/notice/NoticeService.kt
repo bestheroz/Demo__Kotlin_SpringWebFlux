@@ -5,28 +5,26 @@ import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.security.Operator
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 
 @Service
 class NoticeService(
     private val noticeRepository: NoticeRepository,
 ) {
-    suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> {
-        val result = noticeRepository.findAllByRemovedFlagIsFalse(
-            PageRequest.of(
-                request.page - 1,
-                request.pageSize,
-                Sort.by("id").descending()
-            )
-        ).map(NoticeDto.Response::of)
-        return ListResult.of(result)
-    }
+    suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> = ListResult(
+        page = request.page,
+        pageSize = request.pageSize,
+        total = noticeRepository.countByRemovedFlagIsFalse(),
+        items = noticeRepository.findAllByRemovedFlagIsFalse(
+        ).drop(request.page * request.pageSize)  // 페이징 시작점
+            .take(request.pageSize).toList().map(NoticeDto.Response::of),
+    )
 
     suspend fun getNotice(id: Long): NoticeDto.Response {
-        val notice = noticeRepository.findById(id)
-            .orElseThrow { RequestException400(ExceptionCode.UNKNOWN_NOTICE) }
+        val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         return NoticeDto.Response.of(notice)
     }
 
@@ -44,15 +42,13 @@ class NoticeService(
         request: NoticeCreateDto.Request,
         operator: Operator
     ): NoticeDto.Response {
-        val notice = noticeRepository.findById(id)
-            .orElseThrow { RequestException400(ExceptionCode.UNKNOWN_NOTICE) }
+        val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         notice.update(request.title, request.content, request.useFlag, operator)
         return NoticeDto.Response.of(notice)
     }
 
     suspend fun deleteNotice(id: Long, operator: Operator) {
-        val notice = noticeRepository.findById(id)
-            .orElseThrow { RequestException400(ExceptionCode.UNKNOWN_NOTICE) }
+        val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         notice.remove(operator)
     }
 }
