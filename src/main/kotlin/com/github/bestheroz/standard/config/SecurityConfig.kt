@@ -19,28 +19,29 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfig(
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
 ) {
     @Bean
-    fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain = http
-        .csrf { it.disable() }
-        .cors { it.configurationSource(corsConfigurationSource()) }
-        .authorizeExchange {
-            it.pathMatchers(HttpMethod.GET, *GET_PUBLIC).permitAll()
-            it.pathMatchers(HttpMethod.POST, *POST_PUBLIC).permitAll()
-            it.anyExchange().authenticated()
-        }
-        .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-        .build()
+    fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
+        http
+            .csrf { it.disable() }
+            .cors { it.configurationSource(corsConfigurationSource()) }
+            .authorizeExchange {
+                it.pathMatchers(HttpMethod.GET, *GET_PUBLIC).permitAll()
+                it.pathMatchers(HttpMethod.POST, *POST_PUBLIC).permitAll()
+                it.anyExchange().authenticated()
+            }.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+            .build()
 
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
-        val configuration = CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost:8081")
-            allowedHeaders = listOf("*")
-            allowedMethods = listOf("*")
-            allowCredentials = true
-        }
+        val configuration =
+            CorsConfiguration().apply {
+                allowedOrigins = listOf("http://localhost:8081")
+                allowedHeaders = listOf("*")
+                allowedMethods = listOf("*")
+                allowCredentials = true
+            }
 
         return UrlBasedCorsConfigurationSource().apply {
             registerCorsConfiguration("/**", configuration)
@@ -51,23 +52,25 @@ class SecurityConfig(
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     companion object {
-        val GET_PUBLIC = arrayOf(
-            "/swagger-ui.html",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/webjars/**",
-            "/favicon.ico",
-            "/api/v1/health/**",
-            "/api/v1/notices",
-            "/api/v1/notices/{id}",
-            "/api/v1/admins/check-login-id",
-            "/api/v1/admins/renew-token",
-            "/api/v1/users/check-login-id",
-            "/api/v1/users/renew-token"
-        )
-        val POST_PUBLIC = arrayOf(
-            "/api/v1/admins/login",
-            "/api/v1/users/login"
-        )
+        val GET_PUBLIC =
+            arrayOf(
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/webjars/**",
+                "/favicon.ico",
+                "/api/v1/health/**",
+                "/api/v1/notices",
+                "/api/v1/notices/{id}",
+                "/api/v1/admins/check-login-id",
+                "/api/v1/admins/renew-token",
+                "/api/v1/users/check-login-id",
+                "/api/v1/users/renew-token",
+            )
+        val POST_PUBLIC =
+            arrayOf(
+                "/api/v1/admins/login",
+                "/api/v1/users/login",
+            )
     }
 }

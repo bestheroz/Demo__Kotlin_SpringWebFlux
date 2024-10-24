@@ -57,9 +57,8 @@ class JwtTokenProvider(
 
     fun getId(token: String): Long = verifyToken(token).getClaim("id").asLong()
 
-
-    fun getOperator(token: String): Mono<UserDetails> {
-        return Mono.fromCallable {
+    fun getOperator(token: String): Mono<UserDetails> =
+        Mono.fromCallable {
             // JWT 토큰을 검증하고 Operator(UserDetails) 객체 생성
             val jwt = verifyToken(token)
             Operator(
@@ -76,8 +75,6 @@ class JwtTokenProvider(
                     .toList(),
             )
         }
-    }
-
 
     fun resolveAccessToken(request: ServerHttpRequest): String? =
         request.headers.getFirst("Authorization")?.let {

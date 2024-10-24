@@ -14,7 +14,8 @@ import reactor.core.publisher.Mono
 class CurrentUserAspect {
     @Around("execution(* com.github.bestheroz..*(.., @com.github.bestheroz.standard.common.authenticate.CurrentUser (*), ..))")
     fun checkCurrentUser(joinPoint: ProceedingJoinPoint): Mono<Any> {
-        return ReactiveSecurityContextHolder.getContext()
+        return ReactiveSecurityContextHolder
+            .getContext()
             .switchIfEmpty(Mono.error(AuthenticationException401(ExceptionCode.EXPIRED_TOKEN)))
             .flatMap { securityContext ->
                 val authentication = securityContext.authentication

@@ -8,8 +8,6 @@ spring:
     resources:
       chain:
         compressed: true
-  datasource:
-    driver-class-name: com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver
   jackson:
     serialization:
       FAIL_ON_EMPTY_BEANS: false
@@ -43,16 +41,14 @@ spring:
   config:
     activate:
       on-profile: local
-  datasource:
-    url: jdbc:mysql://database-1.cdomw0u4mc2w.ap-northeast-2.rds.amazonaws.com:3306/demo?useSSL=false&serverTimezone=UTC
+  r2dbc:
+    url: r2dbc:mysql://database-1.cdomw0u4mc2w.ap-northeast-2.rds.amazonaws.com:3306/demo?useSSL=false&serverTimezone=UTC
     username: demo
     password: demo!%$@
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 3
-      minimum-idle: 2
-server:
-  port: 8080
+    pool:
+      max-size: 3
+      min-idle: 2
+      initial-size: 2
 sentry:
   logging:
     enabled: false
@@ -66,13 +62,14 @@ spring:
   config:
     activate:
       on-profile: sandbox
-  datasource:
+  r2dbc:
     url:
     username:
     password:
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
+    pool:
+      max-size: 5
+      min-idle: 3
+      initial-size: 3
 sentry:
   environment: sandbox
 jwt:
@@ -82,13 +79,14 @@ spring:
   config:
     activate:
       on-profile: qa
-  datasource:
+  r2dbc:
     url:
     username:
     password:
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
+    pool:
+      max-size: 10
+      min-idle: 5
+      initial-size: 5
 sentry:
   environment: qa
 ---
@@ -96,13 +94,14 @@ spring:
   config:
     activate:
       on-profile: prod
-  datasource:
+  r2dbc:
     url:
     username:
     password:
-    hikari:
-      maximum-pool-size: 30
-      minimum-idle: 10
+    pool:
+      max-size: 30
+      min-idle: 10
+      initial-size: 10
 springdoc:
   api-docs:
     enabled: false

@@ -5,36 +5,24 @@ import com.github.bestheroz.demo.entity.User
 import com.github.bestheroz.standard.common.dto.UserSimpleDto
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
-import jakarta.persistence.*
+import org.springframework.data.annotation.Transient
+import org.springframework.data.relational.core.mapping.Column
 import java.time.Instant
 
-@MappedSuperclass
 abstract class IdCreatedUpdated : IdCreated() {
-    @Column(nullable = false)
+    @Column("updated_object_type")
     lateinit var updatedObjectType: UserTypeEnum
 
-    @Column(nullable = false)
+    @Column("updated_at")
     lateinit var updatedAt: Instant
 
-    @Column(name = "updated_object_id", nullable = false)
+    @Column("updated_object_id")
     var updatedObjectId: Long? = null
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "updated_object_id",
-        referencedColumnName = "id",
-        insertable = false,
-        updatable = false,
-    )
+    @Transient
     var updatedByAdmin: Admin? = null
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "updated_object_id",
-        referencedColumnName = "id",
-        insertable = false,
-        updatable = false,
-    )
+    @Transient
     var updatedByUser: User? = null
 
     fun setUpdatedBy(

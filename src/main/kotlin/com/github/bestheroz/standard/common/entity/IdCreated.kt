@@ -5,40 +5,27 @@ import com.github.bestheroz.demo.entity.User
 import com.github.bestheroz.standard.common.dto.UserSimpleDto
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
-import jakarta.persistence.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import java.time.Instant
 
-@MappedSuperclass
 abstract class IdCreated {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
-    @Column(nullable = false, updatable = false)
+    @Column("created_at")
     lateinit var createdAt: Instant
 
-    @Column(nullable = false, updatable = false)
+    @Column("created_object_type")
     lateinit var createdObjectType: UserTypeEnum
 
-    @Column(name = "created_object_id", nullable = false, updatable = false)
+    @Column("created_object_id")
     var createdObjectId: Long? = null
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "created_object_id",
-        referencedColumnName = "id",
-        insertable = false,
-        updatable = false,
-    )
+    @Transient
     var createdByAdmin: Admin? = null
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "created_object_id",
-        referencedColumnName = "id",
-        insertable = false,
-        updatable = false,
-    )
+    @Transient
     var createdByUser: User? = null
 
     fun setCreatedBy(

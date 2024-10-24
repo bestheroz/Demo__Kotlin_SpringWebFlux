@@ -3,13 +3,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "2.0.20"
+    val kotlinVersion = "2.0.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    kotlin("plugin.jpa") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.0.20-1.0.25"
-    id("org.springframework.boot") version "3.3.3"
+    id("com.google.devtools.ksp") version "2.0.21-1.0.25"
+    id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.diffplug.spotless") version "7.0.0.BETA2"
     id("com.github.ben-manes.versions") version "0.51.0"
@@ -26,7 +25,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.3")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.4")
         mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:3.2.0-M1")
     }
 }
@@ -83,7 +82,7 @@ tasks.withType<Test> {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xuse-k2")
+        freeCompilerArgs.addAll("-Xjsr305=strict")
         jvmTarget.set(JvmTarget.JVM_21)
     }
 }

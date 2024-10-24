@@ -22,28 +22,28 @@ class UserController(
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_VIEW')")
-    fun getUserList(
+    suspend fun getUserList(
         @Schema(example = "1") @RequestParam page: Int,
         @Schema(example = "10") @RequestParam pageSize: Int,
     ): ListResult<UserDto.Response> = userService.getUserList(UserDto.Request(page, pageSize))
 
     @GetMapping("check-login-id")
     @Operation(summary = "로그인 아이디 중복 확인")
-    fun checkLoginId(
+    suspend fun checkLoginId(
         @Schema(description = "로그인 아이디") @RequestParam loginId: String,
         @Schema(description = "유저 ID") @RequestParam(required = false) id: Long?,
     ): Boolean = userService.checkLoginId(loginId, id)
 
     @PostMapping("login")
     @Operation(summary = "유저 로그인")
-    fun loginUser(
+    suspend fun loginUser(
         @RequestBody request: UserLoginDto.Request,
     ): TokenDto = userService.loginUser(request)
 
     @GetMapping("{id}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_VIEW')")
-    fun getUser(
+    suspend fun getUser(
         @PathVariable id: Long,
     ): UserDto.Response = userService.getUser(id)
 
@@ -55,14 +55,14 @@ class UserController(
     "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)"""
         ),
     )
-    fun renewToken(
+    suspend fun renewToken(
         @Schema(description = "리플래시 토큰") @RequestHeader(value = "AuthorizationR") refreshToken: String,
     ): TokenDto = userService.renewToken(refreshToken)
 
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_EDIT')")
-    fun createUser(
+    suspend fun createUser(
         @RequestBody request: UserCreateDto.Request,
         @CurrentUser operator: Operator,
     ): UserDto.Response = userService.createUser(request, operator)
@@ -70,7 +70,7 @@ class UserController(
     @PutMapping("{id}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_EDIT')")
-    fun updateUser(
+    suspend fun updateUser(
         @PathVariable id: Long,
         @RequestBody request: UserUpdateDto.Request,
         @CurrentUser operator: Operator,
@@ -80,7 +80,7 @@ class UserController(
     @Operation(summary = "유저 비밀번호 변경")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_EDIT')")
-    fun changePassword(
+    suspend fun changePassword(
         @PathVariable id: Long,
         @RequestBody request: UserChangePasswordDto.Request,
         @CurrentUser operator: Operator,
@@ -93,7 +93,7 @@ class UserController(
     )
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_EDIT')")
-    fun logout(
+    suspend fun logout(
         @CurrentUser operator: Operator,
     ) = userService.logout(operator.id)
 
@@ -104,7 +104,7 @@ class UserController(
     )
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_EDIT')")
-    fun deleteUser(
+    suspend fun deleteUser(
         @PathVariable id: Long,
         @CurrentUser operator: Operator,
     ) = userService.deleteUser(id, operator)

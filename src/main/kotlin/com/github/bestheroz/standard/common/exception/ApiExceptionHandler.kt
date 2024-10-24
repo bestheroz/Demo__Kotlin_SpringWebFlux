@@ -56,38 +56,45 @@ class ApiExceptionHandler {
     @ExceptionHandler(AuthorityException403::class)
     fun authorityException403(e: AuthorityException403): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .body(ApiResult.of(e.exceptionCode, e.data)))
+        return Mono.just(
+            ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResult.of(e.exceptionCode, e.data)),
+        )
     }
 
     @ExceptionHandler(AuthorizationDeniedException::class, AccessDeniedException::class)
     fun authorizationDeniedException(e: AccessDeniedException): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .body(ApiResult.of(ExceptionCode.UNKNOWN_AUTHORITY)))
+        return Mono.just(
+            ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResult.of(ExceptionCode.UNKNOWN_AUTHORITY)),
+        )
     }
 
     @ExceptionHandler(SystemException500::class)
     fun systemException500(e: SystemException500): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(ResponseEntity
-            .internalServerError()
-            .body(ApiResult.of(e.exceptionCode, e.data)))
+        return Mono.just(
+            ResponseEntity
+                .internalServerError()
+                .body(ApiResult.of(e.exceptionCode, e.data)),
+        )
     }
 
     @ExceptionHandler(IllegalArgumentException::class, IllegalStateException::class)
     fun illegalArgumentException(e: IllegalArgumentException): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(ResponseEntity
-            .status(HttpStatus.UNPROCESSABLE_ENTITY)
-            .body(ApiResult.of(ExceptionCode.INVALID_PARAMETER)))
+        return Mono.just(
+            ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ApiResult.of(ExceptionCode.INVALID_PARAMETER)),
+        )
     }
 
     @ExceptionHandler(UsernameNotFoundException::class)
-    fun usernameNotFoundException(e: UsernameNotFoundException): Mono<ResponseEntity<ApiResult<*>>> =
-        Mono.just(Result.unauthenticated())
+    fun usernameNotFoundException(e: UsernameNotFoundException): Mono<ResponseEntity<ApiResult<*>>> = Mono.just(Result.unauthenticated())
 
     @ExceptionHandler(ServerWebInputException::class)
     fun serverWebInputException(e: ServerWebInputException): Mono<ResponseEntity<ApiResult<*>>> {
@@ -97,7 +104,7 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(
         UnsupportedMediaTypeStatusException::class,
-        MethodNotAllowedException::class
+        MethodNotAllowedException::class,
     )
     fun webFluxExceptions(e: Throwable): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))

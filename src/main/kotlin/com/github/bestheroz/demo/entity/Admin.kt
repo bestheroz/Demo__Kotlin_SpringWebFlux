@@ -5,34 +5,34 @@ import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil.getPasswordHash
-import jakarta.persistence.Column
-import jakarta.persistence.Convert
-import jakarta.persistence.DiscriminatorValue
-import jakarta.persistence.Entity
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
-@Entity
-@DiscriminatorValue("admin")
+@Table("admin")
 data class Admin(
-    @Column(nullable = false)
+    @Column("login_id")
     var loginId: String,
     var password: String? = null,
     var token: String? = null,
-    @Column(nullable = false)
     var name: String,
-    @Column(nullable = false)
+    @Column("use_flag")
     var useFlag: Boolean,
-    @Column(nullable = false)
+    @Column("manager_flag")
     var managerFlag: Boolean,
-    @Convert(converter = AuthorityEnum.AuthorityEnumListConverter::class)
-    @Column(name = "authorities", columnDefinition = "json", nullable = false)
+    @Column("authorities")
     var _authorities: List<AuthorityEnum>,
+    @Column("change_password_at")
     var changePasswordAt: Instant? = null,
+    @Column("latest_active_at")
     var latestActiveAt: Instant? = null,
+    @Column("joined_at")
     var joinedAt: Instant? = null,
-    @Column(nullable = false)
+    @Column("removed_flag")
     var removedFlag: Boolean = false,
+    @Column("removed_at")
     var removedAt: Instant? = null,
+    // Inherit from the converted IdCreatedUpdated
 ) : IdCreatedUpdated() {
     fun getType(): UserTypeEnum = UserTypeEnum.ADMIN
 

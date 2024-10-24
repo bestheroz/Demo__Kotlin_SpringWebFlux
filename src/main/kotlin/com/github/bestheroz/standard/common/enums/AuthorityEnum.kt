@@ -1,7 +1,5 @@
 package com.github.bestheroz.standard.common.enums
 
-import com.github.bestheroz.standard.common.entity.converter.GenericEnumListJsonConverter
-
 enum class AuthorityEnum(
     private val value: String,
 ) {
@@ -11,7 +9,4 @@ enum class AuthorityEnum(
     USER_EDIT("USER_EDIT"),
     NOTICE_VIEW("NOTICE_VIEW"),
     NOTICE_EDIT("NOTICE_EDIT"),
-    ;
-
-    class AuthorityEnumListConverter : GenericEnumListJsonConverter<AuthorityEnum>(AuthorityEnum::class.java)
 }

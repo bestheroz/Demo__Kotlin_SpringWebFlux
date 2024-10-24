@@ -22,16 +22,12 @@ class NoticeController(
     suspend fun getNoticeList(
         @Schema(example = "1") @RequestParam page: Int,
         @Schema(example = "10") @RequestParam pageSize: Int,
-    ): ListResult<NoticeDto.Response> {
-        return noticeService.getNoticeList(NoticeDto.Request(page, pageSize))
-    }
+    ): ListResult<NoticeDto.Response> = noticeService.getNoticeList(NoticeDto.Request(page, pageSize))
 
     @GetMapping("{id}")
     suspend fun getNotice(
         @PathVariable id: Long,
-    ): NoticeDto.Response {
-        return noticeService.getNotice(id)
-    }
+    ): NoticeDto.Response = noticeService.getNotice(id)
 
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
@@ -39,9 +35,7 @@ class NoticeController(
     suspend fun createNotice(
         @RequestBody request: NoticeCreateDto.Request,
         @CurrentUser operator: Operator,
-    ): NoticeDto.Response {
-        return noticeService.createNotice(request, operator)
-    }
+    ): NoticeDto.Response = noticeService.createNotice(request, operator)
 
     @PutMapping("{id}")
     @SecurityRequirement(name = "bearerAuth")
@@ -50,9 +44,7 @@ class NoticeController(
         @PathVariable id: Long,
         @RequestBody request: NoticeCreateDto.Request,
         @CurrentUser operator: Operator,
-    ): NoticeDto.Response {
-        return noticeService.updateNotice(id, request, operator)
-    }
+    ): NoticeDto.Response = noticeService.updateNotice(id, request, operator)
 
     @DeleteMapping("{id}")
     @Operation(description = "(Soft delete)", responses = [ApiResponse(responseCode = "204")])

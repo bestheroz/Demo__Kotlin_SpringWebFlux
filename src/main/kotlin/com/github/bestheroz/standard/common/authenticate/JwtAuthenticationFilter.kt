@@ -30,7 +30,10 @@ class JwtAuthenticationFilter(
     private val publicGetPaths = SecurityConfig.GET_PUBLIC.map { PathPatternParser().parse(it) }
     private val publicPostPaths = SecurityConfig.POST_PUBLIC.map { PathPatternParser().parse(it) }
 
-    override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+    override fun filter(
+        exchange: ServerWebExchange,
+        chain: WebFilterChain,
+    ): Mono<Void> {
         val request = exchange.request
         val requestPath = request.path.value()
 
@@ -44,7 +47,7 @@ class JwtAuthenticationFilter(
                 REQUEST_PARAMETERS,
                 request.method,
                 requestPath,
-                StringUtils.defaultString(request.uri.query)
+                StringUtils.defaultString(request.uri.query),
             )
         }
 
@@ -57,8 +60,7 @@ class JwtAuthenticationFilter(
                 } else {
                     authenticateRequest(exchange, chain)
                 }
-            }
-            .doFinally {
+            }.doFinally {
                 val duration = Duration.between(startTime, Instant.now()).toMillis()
                 if (!requestPath.startsWith("/api/v1/health/")) {
                     log.info(REQUEST_COMPLETE_EXECUTE_TIME, requestPath, duration)
@@ -66,7 +68,10 @@ class JwtAuthenticationFilter(
             }
     }
 
-    private fun authenticateRequest(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+    private fun authenticateRequest(
+        exchange: ServerWebExchange,
+        chain: WebFilterChain,
+    ): Mono<Void> {
         val token = jwtTokenProvider.resolveAccessToken(exchange.request)
 
         return if (token == null) {
@@ -78,17 +83,17 @@ class JwtAuthenticationFilter(
             exchange.response.statusCode = HttpStatus.UNAUTHORIZED
             Mono.empty()
         } else {
-            jwtTokenProvider.getOperator(token)
+            jwtTokenProvider
+                .getOperator(token)
                 .map { userDetails ->
                     UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-                }
-                .flatMap { auth ->
-                    chain.filter(exchange)
+                }.flatMap { auth ->
+                    chain
+                        .filter(exchange)
                         .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth))
                 }
         }
     }
-
 
     private fun isPublicPath(request: ServerHttpRequest): Mono<Boolean> {
         val path = request.path.pathWithinApplication()
@@ -97,7 +102,7 @@ class JwtAuthenticationFilter(
                 HttpMethod.GET -> publicGetPaths.any { it.matches(path) }
                 HttpMethod.POST -> publicPostPaths.any { it.matches(path) }
                 else -> false
-            }
+            },
         )
     }
 }

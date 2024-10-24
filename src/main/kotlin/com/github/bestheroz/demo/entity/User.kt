@@ -1,37 +1,25 @@
 package com.github.bestheroz.demo.entity
 
 import com.github.bestheroz.standard.common.entity.IdCreatedUpdated
-import com.github.bestheroz.standard.common.entity.converter.JsonAttributeConverter
 import com.github.bestheroz.standard.common.enums.AuthorityEnum
-import com.github.bestheroz.standard.common.enums.AuthorityEnum.AuthorityEnumListConverter
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil.getPasswordHash
-import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
-@Table
-@DiscriminatorValue("user")
+@Table("user")
 data class User(
-    @Column
     var loginId: String,
     var password: String? = null,
     var token: String? = null,
-    @Column
     var name: String,
-    @Column
     var useFlag: Boolean,
-    @Convert(converter = AuthorityEnumListConverter::class)
-    @Column(columnDefinition = "json", nullable = false)
     var authorities: List<AuthorityEnum>,
     var changePasswordAt: Instant? = null,
     var latestActiveAt: Instant? = null,
     var joinedAt: Instant? = null,
-    @Convert(converter = JsonAttributeConverter::class)
-    @Column(columnDefinition = "json", nullable = false)
     var additionalInfo: Map<String, Any>,
-    @Column
     var removedFlag: Boolean = false,
     var removedAt: Instant? = null,
 ) : IdCreatedUpdated() {

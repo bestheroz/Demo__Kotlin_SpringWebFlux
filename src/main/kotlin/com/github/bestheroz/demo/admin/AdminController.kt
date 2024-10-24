@@ -22,28 +22,28 @@ class AdminController(
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_VIEW')")
-    fun getAdminList(
+    suspend fun getAdminList(
         @Schema(example = "1") @RequestParam page: Int,
         @Schema(example = "10") @RequestParam pageSize: Int,
     ): ListResult<AdminDto.Response> = adminService.getAdminList(AdminDto.Request(page, pageSize))
 
     @GetMapping("check-login-id")
     @Operation(summary = "로그인 아이디 중복 확인")
-    fun checkLoginId(
+    suspend fun checkLoginId(
         @Schema(description = "로그인 아이디") @RequestParam loginId: String,
         @Schema(description = "관리자 ID") @RequestParam(required = false) id: Long?,
     ): Boolean = adminService.checkLoginId(loginId, id)
 
     @PostMapping("login")
     @Operation(summary = "관리자 로그인")
-    fun loginAdmin(
+    suspend fun loginAdmin(
         @RequestBody request: AdminLoginDto.Request,
     ): TokenDto = adminService.loginAdmin(request)
 
     @GetMapping("{id}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_VIEW')")
-    fun getAdmin(
+    suspend fun getAdmin(
         @PathVariable id: Long,
     ): AdminDto.Response = adminService.getAdmin(id)
 
@@ -55,14 +55,14 @@ class AdminController(
     "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)"""
         ),
     )
-    fun renewToken(
+    suspend fun renewToken(
         @Schema(description = "리플래시 토큰") @RequestHeader(value = "AuthorizationR") refreshToken: String,
     ): TokenDto = adminService.renewToken(refreshToken)
 
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
-    fun createAdmin(
+    suspend fun createAdmin(
         @RequestBody request: AdminCreateDto.Request,
         @CurrentUser operator: Operator,
     ): AdminDto.Response = adminService.createAdmin(request, operator)
@@ -70,7 +70,7 @@ class AdminController(
     @PutMapping("{id}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
-    fun updateAdmin(
+    suspend fun updateAdmin(
         @PathVariable id: Long,
         @RequestBody request: AdminUpdateDto.Request,
         @CurrentUser operator: Operator,
@@ -80,7 +80,7 @@ class AdminController(
     @Operation(summary = "관리자 비밀번호 변경")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
-    fun changePassword(
+    suspend fun changePassword(
         @PathVariable id: Long,
         @RequestBody request: AdminChangePasswordDto.Request,
         @CurrentUser operator: Operator,
@@ -93,7 +93,7 @@ class AdminController(
     )
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
-    fun logout(
+    suspend fun logout(
         @CurrentUser operator: Operator,
     ) = adminService.logout(operator.id)
 
@@ -104,7 +104,7 @@ class AdminController(
     )
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
-    fun deleteAdmin(
+    suspend fun deleteAdmin(
         @PathVariable id: Long,
         @CurrentUser operator: Operator,
     ) = adminService.deleteAdmin(id, operator)

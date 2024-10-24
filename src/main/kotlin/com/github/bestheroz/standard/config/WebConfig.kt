@@ -8,7 +8,8 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 @Configuration
 class WebConfig : WebFluxConfigurer {
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/swagger-ui/**")
+        registry
+            .addResourceHandler("/swagger-ui/**")
             .addResourceLocations("classpath:/META-INF/resources/webjars/springdoc-openapi-ui/")
             .setCacheControl(CacheControl.noCache())
     }

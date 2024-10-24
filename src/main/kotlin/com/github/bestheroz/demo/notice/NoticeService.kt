@@ -14,14 +14,19 @@ import org.springframework.stereotype.Service
 class NoticeService(
     private val noticeRepository: NoticeRepository,
 ) {
-    suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> = ListResult(
-        page = request.page,
-        pageSize = request.pageSize,
-        total = noticeRepository.countByRemovedFlagIsFalse(),
-        items = noticeRepository.findAllByRemovedFlagIsFalse(
-        ).drop(request.page * request.pageSize)  // 페이징 시작점
-            .take(request.pageSize).toList().map(NoticeDto.Response::of),
-    )
+    suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> =
+        ListResult(
+            page = request.page,
+            pageSize = request.pageSize,
+            total = noticeRepository.countByRemovedFlagIsFalse(),
+            items =
+                noticeRepository
+                    .findAllByRemovedFlagIsFalse()
+                    .drop(request.page * request.pageSize) // 페이징 시작점
+                    .take(request.pageSize)
+                    .toList()
+                    .map(NoticeDto.Response::of),
+        )
 
     suspend fun getNotice(id: Long): NoticeDto.Response {
         val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
@@ -30,7 +35,7 @@ class NoticeService(
 
     suspend fun createNotice(
         request: NoticeCreateDto.Request,
-        operator: Operator
+        operator: Operator,
     ): NoticeDto.Response {
         val entity = request.toEntity(operator)
         val savedNotice = noticeRepository.save(entity)
@@ -40,14 +45,17 @@ class NoticeService(
     suspend fun updateNotice(
         id: Long,
         request: NoticeCreateDto.Request,
-        operator: Operator
+        operator: Operator,
     ): NoticeDto.Response {
         val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         notice.update(request.title, request.content, request.useFlag, operator)
         return NoticeDto.Response.of(notice)
     }
 
-    suspend fun deleteNotice(id: Long, operator: Operator) {
+    suspend fun deleteNotice(
+        id: Long,
+        operator: Operator,
+    ) {
         val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         notice.remove(operator)
     }
