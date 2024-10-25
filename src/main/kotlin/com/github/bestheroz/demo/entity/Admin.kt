@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
-@Table("admin")
+@Table(value = "admin")
 data class Admin(
     @Column("login_id")
     var loginId: String,

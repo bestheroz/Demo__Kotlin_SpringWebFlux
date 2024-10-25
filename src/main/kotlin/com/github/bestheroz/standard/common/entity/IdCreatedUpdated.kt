@@ -5,7 +5,6 @@ import com.github.bestheroz.demo.entity.User
 import com.github.bestheroz.standard.common.dto.UserSimpleDto
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
-import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Column
 import java.time.Instant
 

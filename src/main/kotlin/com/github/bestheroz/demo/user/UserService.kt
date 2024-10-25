@@ -1,10 +1,10 @@
 package com.github.bestheroz.demo.user
 
-import com.github.bestheroz.demo.admin.AdminDto.Response.Companion.of
 import com.github.bestheroz.demo.repository.UserRepository
 import com.github.bestheroz.standard.common.authenticate.JwtTokenProvider
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
+import com.github.bestheroz.standard.common.entity.service.OperatorHelper
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class UserService(
     private val userRepository: UserRepository,
+    private val operatorHelper: OperatorHelper,
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
     companion object {
@@ -34,18 +35,20 @@ class UserService(
             pageSize = request.pageSize,
             total = userRepository.countByRemovedFlagIsFalse(),
             items =
-                userRepository
-                    .findAllByRemovedFlagIsFalse()
-                    .drop(request.page * request.pageSize) // 페이징 시작점
-                    .take(request.pageSize)
-                    .toList()
-                    .map(UserDto.Response::of),
+                operatorHelper
+                    .fulfilOperator(
+                        userRepository
+                            .findAllByRemovedFlagIsFalse()
+                            .drop(request.page * request.pageSize) // 페이징 시작점
+                            .take(request.pageSize)
+                            .toList(),
+                    ).map(UserDto.Response::of),
         )
 
     @Transactional(readOnly = true)
     suspend fun getUser(id: Long): UserDto.Response {
         val user = userRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
-        return UserDto.Response.of(user)
+        return UserDto.Response.of(operatorHelper.fulfilOperator(user))
     }
 
     suspend fun createUser(
@@ -55,7 +58,7 @@ class UserService(
         userRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)?.let {
             throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
-        return UserDto.Response.of(userRepository.save(request.toEntity(operator)))
+        return UserDto.Response.of(operatorHelper.fulfilOperator(userRepository.save(request.toEntity(operator))))
     }
 
     suspend fun updateUser(
@@ -82,7 +85,7 @@ class UserService(
             request.authorities,
             operator,
         )
-        return UserDto.Response.of(user)
+        return UserDto.Response.of(operatorHelper.fulfilOperator(user))
     }
 
     suspend fun deleteUser(
@@ -116,7 +119,7 @@ class UserService(
             throw RequestException400(ExceptionCode.CHANGE_TO_SAME_PASSWORD)
         }
         user.changePassword(request.newPassword, operator)
-        return UserDto.Response.of(user)
+        return UserDto.Response.of(operatorHelper.fulfilOperator(user))
     }
 
     suspend fun loginUser(request: UserLoginDto.Request): TokenDto {

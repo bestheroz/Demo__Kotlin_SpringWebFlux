@@ -9,11 +9,13 @@ import org.springframework.stereotype.Repository
 interface UserRepository : CoroutineCrudRepository<User, Long> {
     fun findAllByRemovedFlagIsFalse(): Flow<User>
 
-    fun countByRemovedFlagIsFalse(): Long
+    fun findAllByIdIn(ids: Set<Long>): Flow<User>
 
-    fun findByLoginIdAndRemovedFlagFalse(loginId: String): User?
+    suspend fun countByRemovedFlagIsFalse(): Long
 
-    fun findByLoginIdAndRemovedFlagFalseAndIdNot(
+    suspend fun findByLoginIdAndRemovedFlagFalse(loginId: String): User?
+
+    suspend fun findByLoginIdAndRemovedFlagFalseAndIdNot(
         loginId: String,
         id: Long?,
     ): User?

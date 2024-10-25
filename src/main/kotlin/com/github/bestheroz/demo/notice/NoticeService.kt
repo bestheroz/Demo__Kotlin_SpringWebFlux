@@ -2,6 +2,7 @@ package com.github.bestheroz.demo.notice
 
 import com.github.bestheroz.demo.repository.NoticeRepository
 import com.github.bestheroz.standard.common.dto.ListResult
+import com.github.bestheroz.standard.common.entity.service.OperatorHelper
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.security.Operator
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 @Service
 class NoticeService(
     private val noticeRepository: NoticeRepository,
+    private val operatorHelper: OperatorHelper,
 ) {
     suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> =
         ListResult(
@@ -20,17 +22,19 @@ class NoticeService(
             pageSize = request.pageSize,
             total = noticeRepository.countByRemovedFlagIsFalse(),
             items =
-                noticeRepository
-                    .findAllByRemovedFlagIsFalse()
-                    .drop(request.page * request.pageSize) // 페이징 시작점
-                    .take(request.pageSize)
-                    .toList()
-                    .map(NoticeDto.Response::of),
+                operatorHelper
+                    .fulfilOperator(
+                        noticeRepository
+                            .findAllByRemovedFlagIsFalse()
+                            .drop(request.page * request.pageSize) // 페이징 시작점
+                            .take(request.pageSize)
+                            .toList(),
+                    ).map(NoticeDto.Response::of),
         )
 
     suspend fun getNotice(id: Long): NoticeDto.Response {
         val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
-        return NoticeDto.Response.of(notice)
+        return NoticeDto.Response.of(operatorHelper.fulfilOperator(notice))
     }
 
     suspend fun createNotice(
@@ -39,7 +43,7 @@ class NoticeService(
     ): NoticeDto.Response {
         val entity = request.toEntity(operator)
         val savedNotice = noticeRepository.save(entity)
-        return NoticeDto.Response.of(savedNotice)
+        return NoticeDto.Response.of(operatorHelper.fulfilOperator(savedNotice))
     }
 
     suspend fun updateNotice(
@@ -49,7 +53,7 @@ class NoticeService(
     ): NoticeDto.Response {
         val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         notice.update(request.title, request.content, request.useFlag, operator)
-        return NoticeDto.Response.of(notice)
+        return NoticeDto.Response.of(operatorHelper.fulfilOperator(notice))
     }
 
     suspend fun deleteNotice(
