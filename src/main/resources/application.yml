@@ -42,9 +42,9 @@ spring:
     activate:
       on-profile: local
   r2dbc:
-    url: r2dbc:mysql://database-1.cdomw0u4mc2w.ap-northeast-2.rds.amazonaws.com:3306/demo?useSSL=false&serverTimezone=UTC
-    username: demo
-    password: demo!%$@
+    url: r2dbc:mysql://stkim.ddns.net:3306/studydb?useSSL=false&serverTimezone=UTC&zeroDateTimeBehavior=convertToNull
+    username: studydb
+    password: studydb%#123
     pool:
       max-size: 3
       min-idle: 2
