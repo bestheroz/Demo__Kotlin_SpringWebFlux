@@ -3,14 +3,14 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "2.0.21"
+    val kotlinVersion = "2.1.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.0.21-1.0.25"
-    id("org.springframework.boot") version "3.3.4"
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
-    id("com.diffplug.spotless") version "7.0.0.BETA2"
+    id("com.diffplug.spotless") version "7.0.0.BETA4"
     id("com.github.ben-manes.versions") version "0.51.0"
     idea
 }
@@ -25,8 +25,8 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.4")
-        mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:3.2.0-M1")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.0")
+        mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1")
     }
 }
 
@@ -34,8 +34,8 @@ dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib"))
-    implementation("com.google.dagger:dagger-compiler:2.51.1")
-    ksp("com.google.dagger:dagger-compiler:2.51.1")
+    implementation("com.google.dagger:dagger-compiler:2.53.1")
+    ksp("com.google.dagger:dagger-compiler:2.53.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
@@ -61,8 +61,8 @@ dependencies {
 
     // Logging and Sentry
     implementation("com.auth0:java-jwt:4.4.0")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.0.0-alpha.4")
-    implementation("io.sentry:sentry-logback:8.0.0-alpha.4")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.0.0-rc.2")
+    implementation("io.sentry:sentry-logback:8.0.0-rc.2")
 
     // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
