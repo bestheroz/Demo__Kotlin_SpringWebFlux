@@ -5,6 +5,7 @@ import com.github.bestheroz.demo.entity.User
 import com.github.bestheroz.standard.common.dto.UserSimpleDto
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
+import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Column
 import java.time.Instant
 
@@ -28,19 +29,17 @@ abstract class IdCreatedUpdated : IdCreated() {
         operator: Operator,
         instant: Instant,
     ) {
-        when (operator.type) {
-            UserTypeEnum.ADMIN -> {
-                updatedObjectType = UserTypeEnum.ADMIN
-                updatedByAdmin = Admin.of(operator)
-            }
-            UserTypeEnum.USER -> {
-                updatedObjectType = UserTypeEnum.USER
-                updatedByUser = User.of(operator)
-            }
-        }
         updatedAt = instant
         updatedObjectId = operator.id
         updatedObjectType = operator.type
+        when (operator.type) {
+            UserTypeEnum.ADMIN -> {
+                updatedByAdmin = Admin.of(operator)
+            }
+            UserTypeEnum.USER -> {
+                updatedByUser = User.of(operator)
+            }
+        }
     }
 
     val updatedBy: UserSimpleDto
