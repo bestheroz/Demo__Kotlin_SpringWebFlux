@@ -31,13 +31,16 @@
   <logger name="_org.springframework.web" level="INFO"/>
   <logger name="org.flywaydb.core" level="INFO"/>
 
-  <logger name="org.apache.ibatis" level="INFO"/>
   <logger name="org.apache.commons.beanutils" level="INFO"/>
 
   <logger name="com.zaxxer.hikari" level="INFO"/>
 
-  <logger name="org.hibernate" level="INFO"/>
-  <logger name="org.hibernate.SQL.logStatement" level="DEBUG"/>
+  <logger name="io.netty" level="INFO"/>
+  <logger name="io.r2dbc" level="INFO"/>
+  <logger name="io.asyncer.r2dbc" level="INFO"/>
+  <logger name="reactor.netty" level="INFO"/>
+  <logger name="reactor.pool" level="INFO"/>
+  <logger name="io.asyncer.r2dbc.mysql.QUERY.log" level="DEBUG"/>
 
   <logger name="io.swagger" level="INFO"/>
 
