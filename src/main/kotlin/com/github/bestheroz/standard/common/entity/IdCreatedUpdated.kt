@@ -35,8 +35,10 @@ abstract class IdCreatedUpdated : IdCreated() {
         when (operator.type) {
             UserTypeEnum.ADMIN -> {
                 updatedByAdmin = Admin.of(operator)
+                updatedByUser = null
             }
             UserTypeEnum.USER -> {
+                updatedByAdmin = null
                 updatedByUser = User.of(operator)
             }
         }
