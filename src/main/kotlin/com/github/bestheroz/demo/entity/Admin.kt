@@ -11,26 +11,18 @@ import java.time.Instant
 
 @Table(value = "admin")
 data class Admin(
-    @Column("login_id")
-    var loginId: String,
+    var loginId: String = "",
     var password: String? = null,
     var token: String? = null,
-    var name: String,
-    @Column("use_flag")
-    var useFlag: Boolean,
-    @Column("manager_flag")
-    var managerFlag: Boolean,
+    var name: String = "",
+    var useFlag: Boolean = false,
+    var managerFlag: Boolean = false,
     @Column("authorities")
-    var _authorities: List<AuthorityEnum>,
-    @Column("change_password_at")
+    var _authorities: List<AuthorityEnum> = mutableListOf(),
     var changePasswordAt: Instant? = null,
-    @Column("latest_active_at")
     var latestActiveAt: Instant? = null,
-    @Column("joined_at")
     var joinedAt: Instant? = null,
-    @Column("removed_flag")
     var removedFlag: Boolean = false,
-    @Column("removed_at")
     var removedAt: Instant? = null,
 ) : IdCreatedUpdated() {
     fun getType(): UserTypeEnum = UserTypeEnum.ADMIN
