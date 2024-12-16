@@ -6,6 +6,7 @@ import com.github.bestheroz.standard.common.dto.UserSimpleDto
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Column
 import java.time.Instant
 
@@ -28,29 +29,36 @@ abstract class IdCreated {
     @Transient
     var createdByUser: User? = null
 
+    @Transient var creator: Operator? = null
+
     fun setCreatedBy(
         operator: Operator,
         instant: Instant,
     ) {
-        when (operator.type) {
-            UserTypeEnum.ADMIN -> {
-                createdObjectType = UserTypeEnum.ADMIN
-                createdByAdmin = Admin.of(operator)
-            }
-            UserTypeEnum.USER -> {
-                createdObjectType = UserTypeEnum.USER
-                createdByUser = User.of(operator)
-            }
-        }
         createdAt = instant
         createdObjectId = operator.id
         createdObjectType = operator.type
+        creator = operator
+        when (operator.type) {
+            UserTypeEnum.ADMIN -> {
+                createdByAdmin = Admin.of(operator)
+                createdByUser = null
+            }
+            UserTypeEnum.USER -> {
+                createdByAdmin = null
+                createdByUser = User.of(operator)
+            }
+        }
     }
 
     val createdBy: UserSimpleDto
         get() =
             when (createdObjectType) {
-                UserTypeEnum.ADMIN -> UserSimpleDto.of(createdByAdmin!!)
-                UserTypeEnum.USER -> UserSimpleDto.of(createdByUser!!)
+                UserTypeEnum.ADMIN ->
+                    creator?.let(UserSimpleDto::of) ?: createdByAdmin?.let(UserSimpleDto::of)
+                        ?: throw IllegalStateException("Neither createdByAdmin nor creator exists")
+                UserTypeEnum.USER ->
+                    creator?.let(UserSimpleDto::of) ?: createdByUser?.let(UserSimpleDto::of)
+                        ?: throw IllegalStateException("Neither createdByUser nor creator exists")
             }
 }

@@ -5,6 +5,7 @@ import com.github.bestheroz.demo.entity.User
 import com.github.bestheroz.standard.common.dto.UserSimpleDto
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
+import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Column
 import java.time.Instant
 
@@ -24,29 +25,28 @@ abstract class IdCreatedUpdated : IdCreated() {
     @Transient
     var updatedByUser: User? = null
 
+    @Transient var updater: Operator? = null
+
     fun setUpdatedBy(
         operator: Operator,
         instant: Instant,
     ) {
-        when (operator.type) {
-            UserTypeEnum.ADMIN -> {
-                updatedObjectType = UserTypeEnum.ADMIN
-                updatedByAdmin = Admin.of(operator)
-            }
-            UserTypeEnum.USER -> {
-                updatedObjectType = UserTypeEnum.USER
-                updatedByUser = User.of(operator)
-            }
-        }
         updatedAt = instant
         updatedObjectId = operator.id
         updatedObjectType = operator.type
+        updater = operator
     }
 
     val updatedBy: UserSimpleDto
         get() =
             when (updatedObjectType) {
-                UserTypeEnum.ADMIN -> UserSimpleDto.of(updatedByAdmin!!)
-                UserTypeEnum.USER -> UserSimpleDto.of(updatedByUser!!)
+                UserTypeEnum.ADMIN ->
+                    updater?.let(UserSimpleDto::of)
+                        ?: updatedByAdmin?.let(UserSimpleDto::of)
+                        ?: throw IllegalStateException("Neither updatedByAdmin nor updater exists")
+                UserTypeEnum.USER ->
+                    updater?.let(UserSimpleDto::of)
+                        ?: updatedByUser?.let(UserSimpleDto::of)
+                        ?: throw IllegalStateException("Neither updatedByUser nor updater exists")
             }
 }

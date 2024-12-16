@@ -20,4 +20,4 @@ open class IdCreatedUpdatedDto(
     override val updatedAt: Instant,
     @Schema(description = "수정자", requiredMode = Schema.RequiredMode.REQUIRED)
     override val updatedBy: UserSimpleDto,
-) : CreatedUpdatedDto(updatedAt, updatedBy, createdAt, createdBy)
+) : CreatedUpdatedDto(createdAt, createdBy, updatedAt, updatedBy)

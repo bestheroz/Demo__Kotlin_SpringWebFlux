@@ -32,7 +32,6 @@ data class Admin(
     var removedFlag: Boolean = false,
     @Column("removed_at")
     var removedAt: Instant? = null,
-    // Inherit from the converted IdCreatedUpdated
 ) : IdCreatedUpdated() {
     fun getType(): UserTypeEnum = UserTypeEnum.ADMIN
 
