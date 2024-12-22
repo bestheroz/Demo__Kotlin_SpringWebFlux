@@ -11,10 +11,6 @@ spring:
   jackson:
     serialization:
       FAIL_ON_EMPTY_BEANS: false
-  cloud:
-    aws:
-      region:
-        static: ap-northeast-2
 server:
   port: 8000
   compression:
