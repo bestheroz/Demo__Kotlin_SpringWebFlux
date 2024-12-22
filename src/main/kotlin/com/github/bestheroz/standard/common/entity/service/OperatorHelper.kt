@@ -18,6 +18,7 @@ class OperatorHelper(
     private val userRepository: UserRepository,
 ) {
     suspend fun <T : IdCreatedUpdated> fulfilOperator(operators: List<T>): List<T> {
+        if (operators.isEmpty()) return operators
         val adminIds = HashSet<Long>()
         val userIds = HashSet<Long>()
 
@@ -34,6 +35,7 @@ class OperatorHelper(
     suspend fun <T : IdCreatedUpdated> fulfilOperator(operator: T): T = fulfilOperator(listOf(operator)).first()
 
     suspend fun <T : IdCreated> fulfilCreatedOperator(operators: List<T>): List<T> {
+        if (operators.isEmpty()) return operators
         val adminIds = HashSet<Long>()
         val userIds = HashSet<Long>()
 
