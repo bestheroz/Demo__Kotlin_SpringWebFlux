@@ -118,7 +118,8 @@ class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>>
                                     .contextClassLoader
                                     .loadClass(trimmed)
                                     .name,
-                            ) as Class<out Enum<*>>
+                            )
+                                as Class<out Enum<*>>
                         listOf(java.lang.Enum.valueOf(enumClass, trimmed))
                     }
                 }

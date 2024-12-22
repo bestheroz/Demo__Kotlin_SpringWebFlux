@@ -19,11 +19,9 @@ abstract class IdCreatedUpdated : IdCreated() {
     @Column("updated_object_id")
     var updatedObjectId: Long? = null
 
-    @Transient
-    var updatedByAdmin: Admin? = null
+    @Transient var updatedByAdmin: Admin? = null
 
-    @Transient
-    var updatedByUser: User? = null
+    @Transient var updatedByUser: User? = null
 
     @Transient var updater: Operator? = null
 

@@ -17,8 +17,7 @@ data class Admin(
     var name: String = "",
     var useFlag: Boolean = false,
     var managerFlag: Boolean = false,
-    @Column("authorities")
-    var _authorities: List<AuthorityEnum> = mutableListOf(),
+    @Column("authorities") var _authorities: List<AuthorityEnum> = mutableListOf(),
     var changePasswordAt: Instant? = null,
     var latestActiveAt: Instant? = null,
     var joinedAt: Instant? = null,
@@ -64,9 +63,7 @@ data class Admin(
                 useFlag = false,
                 managerFlag = operator.managerFlag,
                 _authorities = emptyList(),
-            ).apply {
-                this.id = operator.id
-            }
+            ).apply { this.id = operator.id }
     }
 
     fun update(

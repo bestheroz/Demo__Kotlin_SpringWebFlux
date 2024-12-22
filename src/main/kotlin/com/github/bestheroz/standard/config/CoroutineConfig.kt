@@ -19,8 +19,7 @@ class CoroutineConfig : DisposableBean {
     private val job = SupervisorJob()
     private val coroutineScope = CoroutineScope(Dispatchers.IO + job)
 
-    @Bean
-    fun coroutineScope(): CoroutineScope = coroutineScope
+    @Bean fun coroutineScope(): CoroutineScope = coroutineScope
 
     override fun destroy() {
         job.cancel() // 스코프 취소

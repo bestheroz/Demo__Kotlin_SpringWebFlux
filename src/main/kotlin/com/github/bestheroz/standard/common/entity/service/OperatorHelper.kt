@@ -76,20 +76,14 @@ class OperatorHelper(
         if (adminIds.isEmpty()) {
             emptyMap()
         } else {
-            adminRepository
-                .findAllByIdIn(adminIds)
-                .toList()
-                .associateBy { it.id!! }
+            adminRepository.findAllByIdIn(adminIds).toList().associateBy { it.id!! }
         }
 
     private suspend fun fetchUserMap(userIds: Set<Long>): Map<Long, User> =
         if (userIds.isEmpty()) {
             emptyMap()
         } else {
-            userRepository
-                .findAllByIdIn(userIds)
-                .toList()
-                .associateBy { it.id!! }
+            userRepository.findAllByIdIn(userIds).toList().associateBy { it.id!! }
         }
 
     private fun setOperatorData(

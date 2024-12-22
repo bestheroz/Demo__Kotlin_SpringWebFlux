@@ -44,7 +44,9 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException401::class)
-    fun authenticationException401(e: AuthenticationException401): Mono<ResponseEntity<ApiResult<*>>> {
+    fun authenticationException401(
+        e: AuthenticationException401,
+    ): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
         val builder = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         if (e.exceptionCode == ExceptionCode.EXPIRED_TOKEN) {
@@ -57,9 +59,7 @@ class ApiExceptionHandler {
     fun authorityException403(e: AuthorityException403): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
         return Mono.just(
-            ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(ApiResult.of(e.exceptionCode, e.data)),
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResult.of(e.exceptionCode, e.data)),
         )
     }
 
@@ -77,9 +77,7 @@ class ApiExceptionHandler {
     fun systemException500(e: SystemException500): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
         return Mono.just(
-            ResponseEntity
-                .internalServerError()
-                .body(ApiResult.of(e.exceptionCode, e.data)),
+            ResponseEntity.internalServerError().body(ApiResult.of(e.exceptionCode, e.data)),
         )
     }
 
@@ -102,10 +100,7 @@ class ApiExceptionHandler {
         return Mono.just(ResponseEntity.badRequest().build())
     }
 
-    @ExceptionHandler(
-        UnsupportedMediaTypeStatusException::class,
-        MethodNotAllowedException::class,
-    )
+    @ExceptionHandler(UnsupportedMediaTypeStatusException::class, MethodNotAllowedException::class)
     fun webFluxExceptions(e: Throwable): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
         return Mono.just(ResponseEntity.badRequest().build())

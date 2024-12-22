@@ -48,8 +48,7 @@ class SecurityConfig(
         }
     }
 
-    @Bean
-    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+    @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     companion object {
         val GET_PUBLIC =
@@ -67,10 +66,6 @@ class SecurityConfig(
                 "/api/v1/users/check-login-id",
                 "/api/v1/users/renew-token",
             )
-        val POST_PUBLIC =
-            arrayOf(
-                "/api/v1/admins/login",
-                "/api/v1/users/login",
-            )
+        val POST_PUBLIC = arrayOf("/api/v1/admins/login", "/api/v1/users/login")
     }
 }

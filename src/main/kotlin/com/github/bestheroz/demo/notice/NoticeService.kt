@@ -33,7 +33,8 @@ class NoticeService(
         )
 
     suspend fun getNotice(id: Long): NoticeDto.Response {
-        val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+        val notice =
+            noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         return NoticeDto.Response.of(operatorHelper.fulfilOperator(notice))
     }
 
@@ -51,7 +52,8 @@ class NoticeService(
         request: NoticeCreateDto.Request,
         operator: Operator,
     ): NoticeDto.Response {
-        val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+        val notice =
+            noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         notice.update(request.title, request.content, request.useFlag, operator)
         return NoticeDto.Response.of(operatorHelper.fulfilOperator(notice))
     }
@@ -60,7 +62,8 @@ class NoticeService(
         id: Long,
         operator: Operator,
     ) {
-        val notice = noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+        val notice =
+            noticeRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
         notice.remove(operator)
     }
 }

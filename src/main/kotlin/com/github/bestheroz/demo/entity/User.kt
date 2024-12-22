@@ -55,9 +55,7 @@ data class User(
                 useFlag = false,
                 authorities = listOf(),
                 additionalInfo = mapOf(),
-            ).apply {
-                this.id = operator.id
-            }
+            ).apply { this.id = operator.id }
     }
 
     fun update(

@@ -22,7 +22,8 @@ class JwtAuthenticationFilter(
     private val jwtTokenProvider: JwtTokenProvider,
 ) : WebFilter {
     companion object {
-        private const val REQUEST_COMPLETE_EXECUTE_TIME = "{} ....... Request Complete Execute Time ....... : {} ms"
+        private const val REQUEST_COMPLETE_EXECUTE_TIME =
+            "{} ....... Request Complete Execute Time ....... : {} ms"
         private const val REQUEST_PARAMETERS = "<{}>{}?{}"
         private val log = logger()
     }

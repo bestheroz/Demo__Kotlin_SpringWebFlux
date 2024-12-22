@@ -14,10 +14,7 @@ object Result {
 
     fun <T> ok(data: T): ResponseEntity<T> = ResponseEntity.ok(data)
 
-    fun error(): ResponseEntity<ApiResult<*>> =
-        ResponseEntity
-            .internalServerError()
-            .body(of(ExceptionCode.UNKNOWN_SYSTEM_ERROR))
+    fun error(): ResponseEntity<ApiResult<*>> = ResponseEntity.internalServerError().body(of(ExceptionCode.UNKNOWN_SYSTEM_ERROR))
 
     fun unauthenticated(): ResponseEntity<ApiResult<*>> = ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 }

@@ -11,8 +11,7 @@ import org.springframework.data.relational.core.mapping.Column
 import java.time.Instant
 
 abstract class IdCreated {
-    @Id
-    var id: Long? = null
+    @Id var id: Long? = null
 
     @Column("created_at")
     lateinit var createdAt: Instant
@@ -23,11 +22,9 @@ abstract class IdCreated {
     @Column("created_object_id")
     var createdObjectId: Long? = null
 
-    @Transient
-    var createdByAdmin: Admin? = null
+    @Transient var createdByAdmin: Admin? = null
 
-    @Transient
-    var createdByUser: User? = null
+    @Transient var createdByUser: User? = null
 
     @Transient var creator: Operator? = null
 
@@ -55,10 +52,12 @@ abstract class IdCreated {
         get() =
             when (createdObjectType) {
                 UserTypeEnum.ADMIN ->
-                    creator?.let(UserSimpleDto::of) ?: createdByAdmin?.let(UserSimpleDto::of)
+                    creator?.let(UserSimpleDto::of)
+                        ?: createdByAdmin?.let(UserSimpleDto::of)
                         ?: throw IllegalStateException("Neither createdByAdmin nor creator exists")
                 UserTypeEnum.USER ->
-                    creator?.let(UserSimpleDto::of) ?: createdByUser?.let(UserSimpleDto::of)
+                    creator?.let(UserSimpleDto::of)
+                        ?: createdByUser?.let(UserSimpleDto::of)
                         ?: throw IllegalStateException("Neither createdByUser nor creator exists")
             }
 }
