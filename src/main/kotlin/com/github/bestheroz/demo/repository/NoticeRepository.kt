@@ -8,8 +8,4 @@ import org.springframework.stereotype.Repository
 @Repository
 interface NoticeRepository :
     CoroutineCrudRepository<Notice, Long>,
-    NoticeRepositoryCustom {
-    //    fun findAllByRemovedFlagIsFalse(): Flow<Notice>
-
-    suspend fun countByRemovedFlagIsFalse(): Long
-}
+    NoticeRepositoryCustom
