@@ -1,6 +1,5 @@
 package com.github.bestheroz.demo.admin
 
-import com.github.bestheroz.standard.common.authenticate.CurrentUser
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
 import com.github.bestheroz.standard.common.security.Operator
@@ -11,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -65,7 +65,7 @@ class AdminController(
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
     suspend fun createAdmin(
         @RequestBody request: AdminCreateDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): AdminDto.Response = adminService.createAdmin(request, operator)
 
     @PutMapping("{id}")
@@ -74,7 +74,7 @@ class AdminController(
     suspend fun updateAdmin(
         @PathVariable id: Long,
         @RequestBody request: AdminUpdateDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): AdminDto.Response = adminService.updateAdmin(id, request, operator)
 
     @PatchMapping("{id}/password")
@@ -84,7 +84,7 @@ class AdminController(
     suspend fun changePassword(
         @PathVariable id: Long,
         @RequestBody request: AdminChangePasswordDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): AdminDto.Response = adminService.changePassword(id, request, operator)
 
     @DeleteMapping("logout")
@@ -97,7 +97,7 @@ class AdminController(
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
     suspend fun logout(
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ) = adminService.logout(operator.id)
 
     @DeleteMapping("{id}")
@@ -107,6 +107,6 @@ class AdminController(
     @PreAuthorize("hasAuthority('ADMIN_EDIT')")
     suspend fun deleteAdmin(
         @PathVariable id: Long,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ) = adminService.deleteAdmin(id, operator)
 }

@@ -82,13 +82,11 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException::class, IllegalStateException::class)
-    fun illegalArgumentException(e: IllegalArgumentException): Mono<ResponseEntity<ApiResult<*>>> {
+    fun illegalArgumentException(e: Throwable): ResponseEntity<ApiResult<*>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(
-            ResponseEntity
-                .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(ApiResult.of(ExceptionCode.INVALID_PARAMETER)),
-        )
+        return ResponseEntity
+            .status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(ApiResult.of(ExceptionCode.INVALID_PARAMETER))
     }
 
     @ExceptionHandler(UsernameNotFoundException::class)

@@ -1,6 +1,5 @@
 package com.github.bestheroz.demo.notice
 
-import com.github.bestheroz.standard.common.authenticate.CurrentUser
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.security.Operator
 import io.swagger.v3.oas.annotations.Operation
@@ -10,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -34,7 +34,7 @@ class NoticeController(
     @PreAuthorize("hasAuthority('NOTICE_EDIT')")
     suspend fun createNotice(
         @RequestBody request: NoticeCreateDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): NoticeDto.Response = noticeService.createNotice(request, operator)
 
     @PutMapping("{id}")
@@ -43,7 +43,7 @@ class NoticeController(
     suspend fun updateNotice(
         @PathVariable id: Long,
         @RequestBody request: NoticeCreateDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): NoticeDto.Response = noticeService.updateNotice(id, request, operator)
 
     @DeleteMapping("{id}")
@@ -53,7 +53,7 @@ class NoticeController(
     @PreAuthorize("hasAuthority('NOTICE_EDIT')")
     suspend fun deleteNotice(
         @PathVariable id: Long,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ) {
         noticeService.deleteNotice(id, operator)
     }

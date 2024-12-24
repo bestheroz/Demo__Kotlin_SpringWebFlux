@@ -8,7 +8,7 @@ import com.github.bestheroz.standard.common.util.PasswordUtil.getPasswordHash
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
-@Table("user")
+@Table("users")
 data class User(
     var loginId: String,
     var password: String? = null,

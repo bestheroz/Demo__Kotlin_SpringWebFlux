@@ -1,6 +1,5 @@
 package com.github.bestheroz.demo.user
 
-import com.github.bestheroz.standard.common.authenticate.CurrentUser
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
 import com.github.bestheroz.standard.common.security.Operator
@@ -11,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -65,7 +65,7 @@ class UserController(
     @PreAuthorize("hasAuthority('USER_EDIT')")
     suspend fun createUser(
         @RequestBody request: UserCreateDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): UserDto.Response = userService.createUser(request, operator)
 
     @PutMapping("{id}")
@@ -74,7 +74,7 @@ class UserController(
     suspend fun updateUser(
         @PathVariable id: Long,
         @RequestBody request: UserUpdateDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): UserDto.Response = userService.updateUser(id, request, operator)
 
     @PatchMapping("{id}/password")
@@ -84,7 +84,7 @@ class UserController(
     suspend fun changePassword(
         @PathVariable id: Long,
         @RequestBody request: UserChangePasswordDto.Request,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ): UserDto.Response = userService.changePassword(id, request, operator)
 
     @DeleteMapping("logout")
@@ -97,7 +97,7 @@ class UserController(
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_EDIT')")
     suspend fun logout(
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ) = userService.logout(operator.id)
 
     @DeleteMapping("{id}")
@@ -107,6 +107,6 @@ class UserController(
     @PreAuthorize("hasAuthority('USER_EDIT')")
     suspend fun deleteUser(
         @PathVariable id: Long,
-        @CurrentUser operator: Operator,
+        @AuthenticationPrincipal operator: Operator,
     ) = userService.deleteUser(id, operator)
 }

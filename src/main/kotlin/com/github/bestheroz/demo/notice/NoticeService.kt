@@ -9,7 +9,6 @@ import com.github.bestheroz.standard.common.security.Operator
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class NoticeService(
@@ -29,14 +28,18 @@ class NoticeService(
         return operatorHelper.fulfilOperator(notice).let(NoticeDto.Response::of)
     }
 
-    @Transactional
     suspend fun createNotice(
         request: NoticeCreateDto.Request,
         operator: Operator,
     ): NoticeDto.Response {
         val entity = request.toEntity(operator)
-        val savedNotice = noticeRepository.save(entity)
-        return operatorHelper.fulfilOperator(savedNotice).let(NoticeDto.Response::of)
+        println("Saving entity: $entity") // 저장 전 엔티티 출력
+
+        return noticeRepository
+            .save(entity)
+            .also { println("Saved entity: $it") } // 저장 후 엔티티 출력
+            .let { operatorHelper.fulfilOperator(it) }
+            .let { NoticeDto.Response.of(it) }
     }
 
     suspend fun updateNotice(

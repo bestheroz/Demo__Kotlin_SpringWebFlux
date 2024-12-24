@@ -141,7 +141,7 @@ class EnumListToStringConverter(
             if (source.isEmpty()) {
                 "[]"
             } else {
-                objectMapper.writeValueAsString(source)
+                objectMapper.writeValueAsString(source.map { it.name })
             }
         } catch (e: Exception) {
             "[]"
