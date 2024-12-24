@@ -25,11 +25,17 @@ class SecurityConfig(
     fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
         http
             .csrf { it.disable() }
+            .httpBasic { it.disable() }
+            .formLogin { it.disable() }
             .cors { it.configurationSource(corsConfigurationSource()) }
             .authorizeExchange {
-                it.pathMatchers(HttpMethod.GET, *GET_PUBLIC).permitAll()
-                it.pathMatchers(HttpMethod.POST, *POST_PUBLIC).permitAll()
-                it.anyExchange().authenticated()
+                it
+                    .pathMatchers(HttpMethod.GET, *GET_PUBLIC)
+                    .permitAll()
+                    .pathMatchers(HttpMethod.POST, *POST_PUBLIC)
+                    .permitAll()
+                    .anyExchange()
+                    .authenticated()
             }.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .build()
 

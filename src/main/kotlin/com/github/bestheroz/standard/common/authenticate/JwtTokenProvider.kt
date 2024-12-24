@@ -59,21 +59,20 @@ class JwtTokenProvider(
 
     fun getOperator(token: String): Mono<UserDetails> =
         Mono.fromCallable {
-            // JWT 토큰을 검증하고 Operator(UserDetails) 객체 생성
-            val jwt = verifyToken(token)
-            Operator(
-                jwt.getClaim("id").asLong(),
-                jwt.getClaim("loginId").asString(),
-                jwt.getClaim("name").asString(),
-                UserTypeEnum.valueOf(jwt.getClaim("type").asString()),
-                jwt.getClaim("managerFlag").asBoolean(),
-                jwt
-                    .getClaim("authorities")
-                    .asList(String::class.java)
-                    .stream()
-                    .map { value: String -> AuthorityEnum.valueOf(value) }
-                    .toList(),
-            )
+            try {
+                val jwt = verifyToken(token)
+                Operator(
+                    jwt.getClaim("id").asLong(),
+                    jwt.getClaim("loginId").asString(),
+                    jwt.getClaim("name").asString(),
+                    UserTypeEnum.valueOf(jwt.getClaim("type").asString()),
+                    jwt.getClaim("managerFlag").asBoolean(),
+                    jwt.getClaim("authorities").asList(String::class.java).map { AuthorityEnum.valueOf(it) },
+                )
+            } catch (e: Exception) {
+                log.error("Token verification failed", e)
+                throw e
+            }
         }
 
     fun resolveAccessToken(request: ServerHttpRequest): String? =

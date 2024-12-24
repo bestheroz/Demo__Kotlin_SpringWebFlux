@@ -66,7 +66,7 @@ class JwtAuthenticationFilter(
                 if (!requestPath.startsWith("/api/v1/health/")) {
                     log.info(REQUEST_COMPLETE_EXECUTE_TIME, requestPath, duration)
                 }
-            }
+            }.doOnError { error -> log.error("Filter error: ", error) }
     }
 
     private fun authenticateRequest(
