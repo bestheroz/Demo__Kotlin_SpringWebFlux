@@ -41,7 +41,7 @@ class JwtTokenProvider(
             .withClaim("managerFlag", customOperator.managerFlag)
             .withArrayClaim(
                 "authorities",
-                customOperator.authorities.map { it.toString() }.toTypedArray(),
+                customOperator.authorities.map(AuthorityEnum::toString).toTypedArray(),
             ).withExpiresAt(Date.from(Instant.now().plusSeconds(accessTokenExpirationMinutes * 60)))
             .sign(algorithm)
     }
@@ -67,7 +67,7 @@ class JwtTokenProvider(
                     jwt.getClaim("name").asString(),
                     UserTypeEnum.valueOf(jwt.getClaim("type").asString()),
                     jwt.getClaim("managerFlag").asBoolean(),
-                    jwt.getClaim("authorities").asList(String::class.java).map { AuthorityEnum.valueOf(it) },
+                    jwt.getClaim("authorities").asList(String::class.java).map(AuthorityEnum::valueOf),
                 )
             } catch (e: Exception) {
                 log.error("Token verification failed", e)

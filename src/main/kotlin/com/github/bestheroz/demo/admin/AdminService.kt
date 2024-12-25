@@ -42,7 +42,7 @@ class AdminService(
                             .drop(request.page * request.pageSize)
                             .take(request.pageSize)
                             .toList(),
-                    ).map { AdminDto.Response.of(it) },
+                    ).map(AdminDto.Response::of),
         )
 
     @Transactional(readOnly = true)

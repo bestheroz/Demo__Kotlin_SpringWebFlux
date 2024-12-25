@@ -27,10 +27,10 @@ class NoticeService(
 
     @Transactional(readOnly = true)
     suspend fun getNotice(id: Long): NoticeDto.Response =
-        noticeRepository.findById(id)?.let {
-            operatorHelper.fulfilOperator(it)
-            NoticeDto.Response.of(it)
-        } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+        noticeRepository
+            .findById(id)
+            ?.let { operatorHelper.fulfilOperator(it) }
+            ?.let { NoticeDto.Response.of(it) } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
 
     suspend fun createNotice(
         request: NoticeCreateDto.Request,

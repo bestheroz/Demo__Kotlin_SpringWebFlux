@@ -35,7 +35,6 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("com.google.dagger:dagger-compiler:2.54")
     ksp("com.google.dagger:dagger-compiler:2.54")
-//    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Coroutines
