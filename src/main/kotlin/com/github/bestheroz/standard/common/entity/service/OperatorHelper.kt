@@ -2,20 +2,17 @@ package com.github.bestheroz.standard.common.entity.service
 
 import com.github.bestheroz.demo.entity.Admin
 import com.github.bestheroz.demo.entity.User
-import com.github.bestheroz.demo.repository.AdminRepository
-import com.github.bestheroz.demo.repository.UserRepository
+import com.github.bestheroz.demo.repository.OperatorHelperAdminRepository
+import com.github.bestheroz.demo.repository.OperatorHelperUserRepository
 import com.github.bestheroz.standard.common.entity.IdCreated
 import com.github.bestheroz.standard.common.entity.IdCreatedUpdated
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
-import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 @Component
-@Transactional(readOnly = true)
 class OperatorHelper(
-    private val adminRepository: AdminRepository,
-    private val userRepository: UserRepository,
+    private val adminRepository: OperatorHelperAdminRepository,
+    private val userRepository: OperatorHelperUserRepository,
 ) {
     suspend fun <T : IdCreatedUpdated> fulfilOperator(operators: List<T>): List<T> {
         if (operators.isEmpty()) return operators
@@ -78,14 +75,14 @@ class OperatorHelper(
         if (adminIds.isEmpty()) {
             emptyMap()
         } else {
-            adminRepository.findAllByIdIn(adminIds).toList().associateBy { it.id!! }
+            adminRepository.findAllByIdIn(adminIds).associateBy { it.id!! }
         }
 
     private suspend fun fetchUserMap(userIds: Set<Long>): Map<Long, User> =
         if (userIds.isEmpty()) {
             emptyMap()
         } else {
-            userRepository.findAllByIdIn(userIds).toList().associateBy { it.id!! }
+            userRepository.findAllByIdIn(userIds).associateBy { it.id!! }
         }
 
     private fun setOperatorData(

@@ -1,22 +1,18 @@
 package com.github.bestheroz.demo.repository
 
 import com.github.bestheroz.demo.entity.User
-import kotlinx.coroutines.flow.Flow
+import com.github.bestheroz.demo.repository.custom.UserRepositoryCustom
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserRepository : CoroutineCrudRepository<User, Long> {
-    fun findAllByRemovedFlagIsFalse(): Flow<User>
-
-    fun findAllByIdIn(ids: Set<Long>): Flow<User>
-
-    suspend fun countByRemovedFlagIsFalse(): Long
-
+interface UserRepository :
+    CoroutineCrudRepository<User, Long>,
+    UserRepositoryCustom {
     suspend fun findByLoginIdAndRemovedFlagFalse(loginId: String): User?
 
-    suspend fun findByLoginIdAndRemovedFlagFalseAndIdNot(
+    suspend fun countByLoginIdAndRemovedFlagFalseAndIdNot(
         loginId: String,
-        id: Long?,
-    ): User?
+        id: Long,
+    ): Long
 }

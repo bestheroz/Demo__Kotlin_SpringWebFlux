@@ -30,8 +30,8 @@ class AdminController(
     @GetMapping("check-login-id")
     @Operation(summary = "로그인 아이디 중복 확인")
     suspend fun checkLoginId(
-        @Schema(description = "로그인 아이디") @RequestParam loginId: String,
-        @Schema(description = "관리자 ID") @RequestParam(required = false) id: Long?,
+        @Schema(description = "로그인 아이디") @RequestParam("loginId") loginId: String,
+        @Schema(description = "관리자 ID") @RequestParam(value = "id", required = false) id: Long?,
     ): Boolean = adminService.checkLoginId(loginId, id)
 
     @PostMapping("login")

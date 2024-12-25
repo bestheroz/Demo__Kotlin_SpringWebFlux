@@ -11,14 +11,12 @@ import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil.verifyPassword
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
 class AdminService(
     private val adminRepository: AdminRepository,
     private val operatorHelper: OperatorHelper,
@@ -28,30 +26,20 @@ class AdminService(
         private val log = logger()
     }
 
-    @Transactional(readOnly = true)
     suspend fun getAdminList(request: AdminDto.Request): ListResult<AdminDto.Response> =
-        ListResult(
-            page = request.page,
-            pageSize = request.pageSize,
-            total = adminRepository.countByRemovedFlagIsFalse(),
-            items =
-                operatorHelper
-                    .fulfilOperator(
-                        adminRepository
-                            .findAllByRemovedFlagIsFalse()
-                            .drop(request.page * request.pageSize)
-                            .take(request.pageSize)
-                            .toList(),
-                    ).map(AdminDto.Response::of),
-        )
+        adminRepository
+            .findAllByRemovedFlagIsFalse(
+                PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
+            ).map(AdminDto.Response::of)
+            .let { ListResult.of(it) }
 
-    @Transactional(readOnly = true)
-    suspend fun getAdmin(id: Long): AdminDto.Response {
-        val admin =
-            adminRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
-        return AdminDto.Response.of(operatorHelper.fulfilOperator(admin))
-    }
+    suspend fun getAdmin(id: Long): AdminDto.Response =
+        adminRepository
+            .findById(id)
+            ?.let { operatorHelper.fulfilOperator(it) }
+            ?.let { AdminDto.Response.of(it) } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
 
+    @Transactional
     suspend fun createAdmin(
         request: AdminCreateDto.Request,
         operator: Operator,
@@ -59,11 +47,14 @@ class AdminService(
         adminRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)?.let {
             throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
-        return adminRepository.save(request.toEntity(operator)).let {
-            AdminDto.Response.of(operatorHelper.fulfilOperator(it))
-        }
+        return request
+            .toEntity(operator)
+            .let { adminRepository.save(it) }
+            .let { operatorHelper.fulfilOperator(it) }
+            .let { AdminDto.Response.of(it) }
     }
 
+    @Transactional
     suspend fun updateAdmin(
         id: Long,
         request: AdminUpdateDto.Request,
@@ -71,7 +62,6 @@ class AdminService(
     ): AdminDto.Response {
         val admin =
             adminRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
-
         admin.takeIf { it.removedFlag }?.let { throw RequestException400(ExceptionCode.UNKNOWN_ADMIN) }
         admin
             .takeIf { !request.managerFlag && it.id == operator.id }
@@ -79,22 +69,28 @@ class AdminService(
         admin
             .takeIf { !it.managerFlag && !request.managerFlag && !operator.managerFlag }
             ?.let { throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY) }
-        adminRepository.findByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id)?.let {
+
+        if (adminRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id) > 0) {
             throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
 
-        admin.update(
-            request.loginId,
-            request.password,
-            request.name,
-            request.useFlag,
-            request.managerFlag,
-            request.authorities,
-            operator,
-        )
-        return AdminDto.Response.of(operatorHelper.fulfilOperator(admin))
+        return admin
+            .let {
+                it.update(
+                    request.loginId,
+                    request.password,
+                    request.name,
+                    request.useFlag,
+                    request.managerFlag,
+                    request.authorities,
+                    operator,
+                )
+                adminRepository.save(it)
+            }.let { operatorHelper.fulfilOperator(it) }
+            .let { AdminDto.Response.of(it) }
     }
 
+    @Transactional
     suspend fun deleteAdmin(
         id: Long,
         operator: Operator,
@@ -105,9 +101,13 @@ class AdminService(
         admin
             .takeIf { it.id == operator.id }
             ?.let { throw RequestException400(ExceptionCode.CANNOT_REMOVE_YOURSELF) }
-        admin.remove(operator)
+        return admin.let {
+            it.remove(operator)
+            adminRepository.save(it)
+        }
     }
 
+    @Transactional
     suspend fun changePassword(
         id: Long,
         request: AdminChangePasswordDto.Request,
@@ -125,10 +125,15 @@ class AdminService(
         admin.password
             ?.takeIf { it == request.newPassword }
             ?.let { throw RequestException400(ExceptionCode.CHANGE_TO_SAME_PASSWORD) }
-        admin.changePassword(request.newPassword, operator)
-        return AdminDto.Response.of(operatorHelper.fulfilOperator(admin))
+        return admin
+            .let {
+                it.changePassword(request.newPassword, operator)
+                adminRepository.save(it)
+            }.let { operatorHelper.fulfilOperator(it) }
+            .let { AdminDto.Response.of(it) }
     }
 
+    @Transactional
     suspend fun loginAdmin(request: AdminLoginDto.Request): TokenDto {
         val admin =
             adminRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)
@@ -143,10 +148,14 @@ class AdminService(
                 log.warn("password not match")
                 throw RequestException400(ExceptionCode.INVALID_PASSWORD)
             }
-        admin.renewToken(jwtTokenProvider.createRefreshToken(Operator(admin)))
-        return TokenDto(jwtTokenProvider.createAccessToken(Operator(admin)), admin.token ?: "")
+        return admin
+            .let {
+                it.renewToken(jwtTokenProvider.createRefreshToken(Operator(it)))
+                adminRepository.save(it)
+            }.let { TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token!!) }
     }
 
+    @Transactional
     suspend fun renewToken(refreshToken: String): TokenDto {
         val admin =
             adminRepository.findById(jwtTokenProvider.getId(refreshToken))
@@ -167,15 +176,16 @@ class AdminService(
         throw AuthenticationException401()
     }
 
+    @Transactional
     suspend fun logout(id: Long) {
-        val admin =
-            (adminRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN))
-        admin.logout()
+        adminRepository.findById(id)?.let {
+            it.logout()
+            adminRepository.save(it)
+        } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
-    @Transactional(readOnly = true)
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,
-    ): Boolean = adminRepository.findByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id) == null
+    ): Boolean = adminRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id ?: 0) == 0L
 }

@@ -1,22 +1,18 @@
 package com.github.bestheroz.demo.repository
 
 import com.github.bestheroz.demo.entity.Admin
-import kotlinx.coroutines.flow.Flow
+import com.github.bestheroz.demo.repository.custom.AdminRepositoryCustom
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface AdminRepository : CoroutineCrudRepository<Admin, Long> {
-    fun findAllByRemovedFlagIsFalse(): Flow<Admin>
-
-    fun findAllByIdIn(ids: Set<Long>): Flow<Admin>
-
-    suspend fun countByRemovedFlagIsFalse(): Long
-
+interface AdminRepository :
+    CoroutineCrudRepository<Admin, Long>,
+    AdminRepositoryCustom {
     suspend fun findByLoginIdAndRemovedFlagFalse(loginId: String): Admin?
 
-    suspend fun findByLoginIdAndRemovedFlagFalseAndIdNot(
+    suspend fun countByLoginIdAndRemovedFlagFalseAndIdNot(
         loginId: String,
-        id: Long?,
-    ): Admin?
+        id: Long,
+    ): Long
 }

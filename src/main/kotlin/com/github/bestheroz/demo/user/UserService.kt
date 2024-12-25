@@ -11,9 +11,8 @@ import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil.verifyPassword
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,26 +29,18 @@ class UserService(
 
     @Transactional(readOnly = true)
     suspend fun getUserList(request: UserDto.Request): ListResult<UserDto.Response> =
-        ListResult(
-            page = request.page,
-            pageSize = request.pageSize,
-            total = userRepository.countByRemovedFlagIsFalse(),
-            items =
-                operatorHelper
-                    .fulfilOperator(
-                        userRepository
-                            .findAllByRemovedFlagIsFalse()
-                            .drop(request.page * request.pageSize) // 페이징 시작점
-                            .take(request.pageSize)
-                            .toList(),
-                    ).map(UserDto.Response::of),
-        )
+        userRepository
+            .findAllByRemovedFlagIsFalse(
+                PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
+            ).map(UserDto.Response::of)
+            .let { ListResult.of(it) }
 
     @Transactional(readOnly = true)
-    suspend fun getUser(id: Long): UserDto.Response {
-        val user = userRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
-        return UserDto.Response.of(operatorHelper.fulfilOperator(user))
-    }
+    suspend fun getUser(id: Long): UserDto.Response =
+        userRepository
+            .findById(id)
+            ?.let { operatorHelper.fulfilOperator(it) }
+            ?.let { UserDto.Response.of(it) } ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
 
     suspend fun createUser(
         request: UserCreateDto.Request,
@@ -58,9 +49,11 @@ class UserService(
         userRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)?.let {
             throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
-        return UserDto.Response.of(
-            operatorHelper.fulfilOperator(userRepository.save(request.toEntity(operator))),
-        )
+        return request
+            .toEntity(operator)
+            .let { userRepository.save(it) }
+            .let { operatorHelper.fulfilOperator(it) }
+            .let { UserDto.Response.of(it) }
     }
 
     suspend fun updateUser(
@@ -71,19 +64,23 @@ class UserService(
         val user = userRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
         user.takeIf { it.removedFlag }?.let { throw RequestException400(ExceptionCode.UNKNOWN_USER) }
 
-        userRepository.findByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id)?.let {
+        if (userRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id) > 0) {
             throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
 
-        user.update(
-            request.loginId,
-            request.password,
-            request.name,
-            request.useFlag,
-            request.authorities,
-            operator,
-        )
-        return UserDto.Response.of(operatorHelper.fulfilOperator(user))
+        return user
+            .let {
+                it.update(
+                    request.loginId,
+                    request.password,
+                    request.name,
+                    request.useFlag,
+                    request.authorities,
+                    operator,
+                )
+                userRepository.save(it)
+            }.let { operatorHelper.fulfilOperator(it) }
+            .let { UserDto.Response.of(it) }
     }
 
     suspend fun deleteUser(
@@ -95,7 +92,10 @@ class UserService(
         user
             .takeIf { it.id == operator.id }
             ?.let { throw RequestException400(ExceptionCode.CANNOT_REMOVE_YOURSELF) }
-        user.remove(operator)
+        return user.let {
+            it.remove(operator)
+            userRepository.save(it)
+        }
     }
 
     suspend fun changePassword(
@@ -114,8 +114,12 @@ class UserService(
         user.password
             ?.takeIf { it == request.newPassword }
             ?.let { throw RequestException400(ExceptionCode.CHANGE_TO_SAME_PASSWORD) }
-        user.changePassword(request.newPassword, operator)
-        return UserDto.Response.of(operatorHelper.fulfilOperator(user))
+        return user
+            .let {
+                it.changePassword(request.newPassword, operator)
+                userRepository.save(it)
+            }.let { operatorHelper.fulfilOperator(it) }
+            .let { UserDto.Response.of(it) }
     }
 
     suspend fun loginUser(request: UserLoginDto.Request): TokenDto {
@@ -131,8 +135,11 @@ class UserService(
                 log.warn("password not match")
                 throw RequestException400(ExceptionCode.INVALID_PASSWORD)
             }
-        user.renewToken(jwtTokenProvider.createRefreshToken(Operator(user)))
-        return TokenDto(jwtTokenProvider.createAccessToken(Operator(user)), user.token!!)
+        return user
+            .let {
+                it.renewToken(jwtTokenProvider.createRefreshToken(Operator(it)))
+                userRepository.save(it)
+            }.let { TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token!!) }
     }
 
     suspend fun renewToken(refreshToken: String): TokenDto {
@@ -155,13 +162,15 @@ class UserService(
     }
 
     suspend fun logout(id: Long) {
-        val user = userRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
-        user.logout()
+        userRepository.findById(id)?.let {
+            it.logout()
+            userRepository.save(it)
+        } ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
     }
 
     @Transactional(readOnly = true)
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,
-    ): Boolean = userRepository.findByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id) == null
+    ): Boolean = userRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id ?: 0) == 0L
 }
