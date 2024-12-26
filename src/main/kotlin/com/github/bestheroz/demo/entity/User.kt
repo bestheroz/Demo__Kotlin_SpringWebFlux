@@ -10,16 +10,16 @@ import java.time.Instant
 
 @Table("users")
 data class User(
-    var loginId: String,
+    var loginId: String = "",
     var password: String? = null,
     var token: String? = null,
-    var name: String,
-    var useFlag: Boolean,
-    var authorities: List<AuthorityEnum>,
+    var name: String = "",
+    var useFlag: Boolean = false,
+    var authorities: List<AuthorityEnum> = emptyList(),
     var changePasswordAt: Instant? = null,
     var latestActiveAt: Instant? = null,
     var joinedAt: Instant? = null,
-    var additionalInfo: Map<String, Any>,
+    var additionalInfo: Map<String, Any>? = null,
     var removedFlag: Boolean = false,
     var removedAt: Instant? = null,
 ) : IdCreatedUpdated() {
@@ -38,7 +38,7 @@ data class User(
             name = name,
             useFlag = useFlag,
             authorities = authorities,
-            additionalInfo = mapOf(),
+            additionalInfo = emptyMap(),
         ).apply {
             val now = Instant.now()
             this.password = getPasswordHash(password)
@@ -53,8 +53,8 @@ data class User(
                 loginId = operator.loginId,
                 name = operator.name,
                 useFlag = false,
-                authorities = listOf(),
-                additionalInfo = mapOf(),
+                authorities = emptyList(),
+                additionalInfo = emptyMap(),
             ).apply { this.id = operator.id }
     }
 

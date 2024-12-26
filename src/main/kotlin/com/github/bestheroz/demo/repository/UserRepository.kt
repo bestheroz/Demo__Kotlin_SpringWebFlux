@@ -10,9 +10,4 @@ interface UserRepository :
     CoroutineCrudRepository<User, Long>,
     UserRepositoryCustom {
     suspend fun findByLoginIdAndRemovedFlagFalse(loginId: String): User?
-
-    suspend fun countByLoginIdAndRemovedFlagFalseAndIdNot(
-        loginId: String,
-        id: Long,
-    ): Long
 }

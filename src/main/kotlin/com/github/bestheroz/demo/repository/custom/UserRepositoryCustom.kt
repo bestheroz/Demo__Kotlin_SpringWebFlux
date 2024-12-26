@@ -6,4 +6,9 @@ import org.springframework.data.domain.Pageable
 
 interface UserRepositoryCustom {
     suspend fun findAllByRemovedFlagIsFalse(pageable: Pageable): Page<User>
+
+    suspend fun existsByLoginIdAndRemovedFlagFalseAndIdNot(
+        loginId: String,
+        id: Long?,
+    ): Boolean
 }

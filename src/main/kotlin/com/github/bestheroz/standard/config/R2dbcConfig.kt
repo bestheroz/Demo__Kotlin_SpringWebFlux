@@ -1,5 +1,6 @@
 package com.github.bestheroz.standard.config
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,6 +28,8 @@ class R2dbcConfig(
                 EnumListToStringConverter(objectMapper),
                 ByteToBooleanConverter(),
                 BooleanToByteConverter(),
+                MapReadConverter(),
+                MapWriteConverter(),
             ),
         )
 }
@@ -146,4 +149,14 @@ class EnumListToStringConverter(
         } catch (e: Exception) {
             "[]"
         }
+}
+
+@ReadingConverter
+class MapReadConverter : Converter<String, Map<String, Any>> {
+    override fun convert(source: String): Map<String, Any> = ObjectMapper().readValue(source, object : TypeReference<Map<String, Any>>() {})
+}
+
+@WritingConverter
+class MapWriteConverter : Converter<Map<String, Any>, String> {
+    override fun convert(source: Map<String, Any>): String = ObjectMapper().writeValueAsString(source)
 }

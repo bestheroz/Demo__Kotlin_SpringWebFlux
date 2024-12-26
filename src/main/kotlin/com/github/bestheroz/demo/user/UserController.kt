@@ -80,7 +80,6 @@ class UserController(
     @PatchMapping("{id}/password")
     @Operation(summary = "유저 비밀번호 변경")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAuthority('USER_EDIT')")
     suspend fun changePassword(
         @PathVariable id: Long,
         @RequestBody request: UserChangePasswordDto.Request,

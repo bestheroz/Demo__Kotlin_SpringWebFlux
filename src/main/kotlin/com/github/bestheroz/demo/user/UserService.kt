@@ -64,7 +64,7 @@ class UserService(
         val user = userRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
         user.takeIf { it.removedFlag }?.let { throw RequestException400(ExceptionCode.UNKNOWN_USER) }
 
-        if (userRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id) > 0) {
+        if (userRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id)) {
             throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
 
@@ -179,5 +179,5 @@ class UserService(
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,
-    ): Boolean = userRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id ?: 0) == 0L
+    ): Boolean = !userRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id ?: 0)
 }

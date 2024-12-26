@@ -32,4 +32,20 @@ class UserRepositoryCustomImpl(
             .let { operatorHelper.fulfilOperator(it) }
             .let { PageImpl(it, pageable, count) }
     }
+
+    override suspend fun existsByLoginIdAndRemovedFlagFalseAndIdNot(
+        loginId: String,
+        id: Long?,
+    ): Boolean {
+        val criteria =
+            Criteria
+                .where("login_id")
+                .`is`(loginId)
+                .and("removed_flag")
+                .`is`(false)
+
+        return template
+            .exists(Query.query(id?.let { criteria.and("id").not(it) } ?: criteria), User::class.java)
+            .awaitSingle()
+    }
 }
