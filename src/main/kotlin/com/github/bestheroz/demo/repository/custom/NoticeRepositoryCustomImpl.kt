@@ -23,15 +23,13 @@ class NoticeRepositoryCustomImpl(
             return PageImpl(emptyList(), pageable, 0)
         }
 
-        val notices =
-            template
-                .select(Notice::class.java)
-                .matching(query.with(pageable))
-                .all()
-                .collectList()
-                .awaitSingle()
-                .let { operatorHelper.fulfilOperator(it) }
-
-        return PageImpl(notices, pageable, count)
+        return template
+            .select(Notice::class.java)
+            .matching(query.with(pageable))
+            .all()
+            .collectList()
+            .awaitSingle()
+            .let { operatorHelper.fulfilOperator(it) }
+            .let { PageImpl(it, pageable, count) }
     }
 }

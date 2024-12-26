@@ -23,15 +23,13 @@ class AdminRepositoryCustomImpl(
             return PageImpl(emptyList(), pageable, 0)
         }
 
-        val admins =
-            template
-                .select(Admin::class.java)
-                .matching(query.with(pageable))
-                .all()
-                .collectList()
-                .awaitSingle()
-                .let { operatorHelper.fulfilOperator(it) }
-
-        return PageImpl(admins, pageable, count)
+        return template
+            .select(Admin::class.java)
+            .matching(query.with(pageable))
+            .all()
+            .collectList()
+            .awaitSingle()
+            .let { operatorHelper.fulfilOperator(it) }
+            .let { PageImpl(it, pageable, count) }
     }
 }

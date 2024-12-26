@@ -23,15 +23,13 @@ class UserRepositoryCustomImpl(
             return PageImpl(emptyList(), pageable, 0)
         }
 
-        val users =
-            template
-                .select(User::class.java)
-                .matching(query.with(pageable))
-                .all()
-                .collectList()
-                .awaitSingle()
-                .let { operatorHelper.fulfilOperator(it) }
-
-        return PageImpl(users, pageable, count)
+        return template
+            .select(User::class.java)
+            .matching(query.with(pageable))
+            .all()
+            .collectList()
+            .awaitSingle()
+            .let { operatorHelper.fulfilOperator(it) }
+            .let { PageImpl(it, pageable, count) }
     }
 }
