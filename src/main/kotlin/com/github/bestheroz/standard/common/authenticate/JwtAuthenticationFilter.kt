@@ -16,6 +16,7 @@ import org.springframework.web.util.pattern.PathPatternParser
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.Instant
+import kotlin.collections.mapNotNull
 
 @Component
 class JwtAuthenticationFilter(
@@ -86,7 +87,7 @@ class JwtAuthenticationFilter(
         } else {
             jwtTokenProvider
                 .getOperator(token)
-                .map { userDetails ->
+                .mapNotNull { userDetails ->
                     UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
                 }.flatMap { auth ->
                     chain

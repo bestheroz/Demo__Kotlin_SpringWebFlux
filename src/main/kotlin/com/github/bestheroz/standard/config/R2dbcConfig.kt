@@ -98,7 +98,7 @@ class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>>
                                 .split(",")
                                 .map { it.trim().replace("\"", "") }
                                 .filter { it.isNotEmpty() }
-                                .map { enumValue ->
+                                .mapNotNull { enumValue ->
                                     // 여기서 실제 Enum 타입을 찾아서 변환
                                     val enumClass =
                                         Class.forName(
