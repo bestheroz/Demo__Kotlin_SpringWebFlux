@@ -31,8 +31,8 @@ class UserController(
     @Operation(summary = "로그인 아이디 중복 확인")
     suspend fun checkLoginId(
         @Schema(description = "로그인 아이디") @RequestParam loginId: String,
-        @Schema(description = "유저 ID") @RequestParam(required = false) id: Long?,
-    ): Boolean = userService.checkLoginId(loginId, id)
+        @Schema(description = "유저 ID") @RequestParam(required = false) userId: Long?,
+    ): Boolean = userService.checkLoginId(loginId, userId)
 
     @PostMapping("login")
     @Operation(summary = "유저 로그인")
@@ -95,7 +95,6 @@ class UserController(
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAuthority('USER_EDIT')")
     suspend fun logout(
         @AuthenticationPrincipal operator: Operator,
     ) = userService.logout(operator.id)

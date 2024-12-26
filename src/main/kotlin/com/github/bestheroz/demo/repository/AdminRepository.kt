@@ -10,9 +10,4 @@ interface AdminRepository :
     CoroutineCrudRepository<Admin, Long>,
     AdminRepositoryCustom {
     suspend fun findByLoginIdAndRemovedFlagFalse(loginId: String): Admin?
-
-    suspend fun countByLoginIdAndRemovedFlagFalseAndIdNot(
-        loginId: String,
-        id: Long,
-    ): Long
 }

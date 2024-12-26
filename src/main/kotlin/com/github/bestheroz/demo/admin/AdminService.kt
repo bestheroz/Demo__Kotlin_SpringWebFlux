@@ -5,6 +5,7 @@ import com.github.bestheroz.standard.common.authenticate.JwtTokenProvider
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
 import com.github.bestheroz.standard.common.entity.service.OperatorHelper
+import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
@@ -70,7 +71,7 @@ class AdminService(
             .takeIf { !it.managerFlag && !request.managerFlag && !operator.managerFlag }
             ?.let { throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY) }
 
-        if (adminRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id) > 0) {
+        if (adminRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id)) {
             throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
 
@@ -113,6 +114,9 @@ class AdminService(
         request: AdminChangePasswordDto.Request,
         operator: Operator,
     ): AdminDto.Response {
+        if (operator.id != id && !operator.authorities.contains(AuthorityEnum.ADMIN_EDIT)) {
+            throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY)
+        }
         val admin =
             adminRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
         admin.takeIf { it.removedFlag }?.let { throw RequestException400(ExceptionCode.UNKNOWN_ADMIN) }
@@ -187,5 +191,5 @@ class AdminService(
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,
-    ): Boolean = adminRepository.countByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id ?: 0) == 0L
+    ): Boolean = !adminRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id)
 }

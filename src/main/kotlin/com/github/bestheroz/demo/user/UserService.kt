@@ -5,6 +5,7 @@ import com.github.bestheroz.standard.common.authenticate.JwtTokenProvider
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
 import com.github.bestheroz.standard.common.entity.service.OperatorHelper
+import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
 class UserService(
     private val userRepository: UserRepository,
     private val operatorHelper: OperatorHelper,
@@ -27,7 +27,6 @@ class UserService(
         private val log = logger()
     }
 
-    @Transactional(readOnly = true)
     suspend fun getUserList(request: UserDto.Request): ListResult<UserDto.Response> =
         userRepository
             .findAllByRemovedFlagIsFalse(
@@ -35,13 +34,13 @@ class UserService(
             ).map(UserDto.Response::of)
             .let { ListResult.of(it) }
 
-    @Transactional(readOnly = true)
     suspend fun getUser(id: Long): UserDto.Response =
         userRepository
             .findById(id)
             ?.let { operatorHelper.fulfilOperator(it) }
             ?.let { UserDto.Response.of(it) } ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
 
+    @Transactional
     suspend fun createUser(
         request: UserCreateDto.Request,
         operator: Operator,
@@ -56,6 +55,7 @@ class UserService(
             .let { UserDto.Response.of(it) }
     }
 
+    @Transactional
     suspend fun updateUser(
         id: Long,
         request: UserUpdateDto.Request,
@@ -83,6 +83,7 @@ class UserService(
             .let { UserDto.Response.of(it) }
     }
 
+    @Transactional
     suspend fun deleteUser(
         id: Long,
         operator: Operator,
@@ -98,11 +99,15 @@ class UserService(
         }
     }
 
+    @Transactional
     suspend fun changePassword(
         id: Long,
         request: UserChangePasswordDto.Request,
         operator: Operator,
     ): UserDto.Response {
+        if (operator.id != id && !operator.authorities.contains(AuthorityEnum.USER_EDIT)) {
+            throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY)
+        }
         val user = userRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
         user.takeIf { it.removedFlag }?.let { throw RequestException400(ExceptionCode.UNKNOWN_USER) }
         user.password
@@ -122,6 +127,7 @@ class UserService(
             .let { UserDto.Response.of(it) }
     }
 
+    @Transactional
     suspend fun loginUser(request: UserLoginDto.Request): TokenDto {
         val user =
             userRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)
@@ -142,6 +148,7 @@ class UserService(
             }.let { TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token!!) }
     }
 
+    @Transactional
     suspend fun renewToken(refreshToken: String): TokenDto {
         val user =
             userRepository.findById(jwtTokenProvider.getId(refreshToken))
@@ -161,6 +168,7 @@ class UserService(
         throw AuthenticationException401()
     }
 
+    @Transactional
     suspend fun logout(id: Long) {
         userRepository.findById(id)?.let {
             it.logout()
@@ -168,7 +176,6 @@ class UserService(
         } ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
     }
 
-    @Transactional(readOnly = true)
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,
