@@ -70,7 +70,9 @@ class TraceLogger {
                 }
             }
         } catch (e: Throwable) {
-            stopWatch.stop()
+            if (stopWatch.isRunning) {
+                stopWatch.stop()
+            }
             log.info(STR_END_EXECUTE_TIME_FOR_EXCEPTION, signature, stopWatch.totalTimeMillis)
             throw e
         }
