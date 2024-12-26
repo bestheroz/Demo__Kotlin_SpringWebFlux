@@ -30,7 +30,8 @@ class UserRepositoryCustomImpl(
                 .all()
                 .collectList()
                 .awaitSingle()
+                .let { operatorHelper.fulfilOperator(it) }
 
-        return PageImpl(operatorHelper.fulfilOperator(users), pageable, count)
+        return PageImpl(users, pageable, count)
     }
 }
