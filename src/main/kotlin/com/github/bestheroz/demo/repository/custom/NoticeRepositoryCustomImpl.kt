@@ -1,7 +1,7 @@
 package com.github.bestheroz.demo.repository.custom
 
-import com.github.bestheroz.demo.entity.Notice
-import com.github.bestheroz.standard.common.entity.service.OperatorHelper
+import com.github.bestheroz.demo.domain.Notice
+import com.github.bestheroz.standard.common.domain.service.OperatorHelper
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl

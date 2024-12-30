@@ -1,5 +1,11 @@
-package com.github.bestheroz.demo.user
+package com.github.bestheroz.demo.controllers
 
+import com.github.bestheroz.demo.dtos.user.UserChangePasswordDto
+import com.github.bestheroz.demo.dtos.user.UserCreateDto
+import com.github.bestheroz.demo.dtos.user.UserDto
+import com.github.bestheroz.demo.dtos.user.UserLoginDto
+import com.github.bestheroz.demo.dtos.user.UserUpdateDto
+import com.github.bestheroz.demo.services.UserService
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
 import com.github.bestheroz.standard.common.security.Operator
@@ -11,7 +17,18 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("api/v1/users")

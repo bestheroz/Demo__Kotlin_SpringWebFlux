@@ -1,6 +1,6 @@
 package com.github.bestheroz.demo.repository
 
-import com.github.bestheroz.demo.entity.User
+import com.github.bestheroz.demo.domain.User
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 

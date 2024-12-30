@@ -1,6 +1,6 @@
 package com.github.bestheroz.demo.repository.custom
 
-import com.github.bestheroz.demo.entity.Notice
+import com.github.bestheroz.demo.domain.Notice
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 

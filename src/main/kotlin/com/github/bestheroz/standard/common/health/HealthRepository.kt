@@ -1,6 +1,6 @@
 package com.github.bestheroz.standard.common.health
 
-import com.github.bestheroz.demo.entity.Admin
+import com.github.bestheroz.demo.domain.Admin
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository

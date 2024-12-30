@@ -1,8 +1,8 @@
-package com.github.bestheroz.demo.notice
+package com.github.bestheroz.demo.dtos.notice
 
 import com.github.bestheroz.demo.repository.NoticeRepository
+import com.github.bestheroz.standard.common.domain.service.OperatorHelper
 import com.github.bestheroz.standard.common.dto.ListResult
-import com.github.bestheroz.standard.common.entity.service.OperatorHelper
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.security.Operator

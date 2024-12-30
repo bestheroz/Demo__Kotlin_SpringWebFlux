@@ -1,6 +1,6 @@
 package com.github.bestheroz.demo.repository
 
-import com.github.bestheroz.demo.entity.Notice
+import com.github.bestheroz.demo.domain.Notice
 import com.github.bestheroz.demo.repository.custom.NoticeRepositoryCustom
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository

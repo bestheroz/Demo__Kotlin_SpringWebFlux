@@ -1,17 +1,22 @@
-package com.github.bestheroz.demo.admin
+package com.github.bestheroz.demo.services
 
+import com.github.bestheroz.demo.dtos.admin.AdminChangePasswordDto
+import com.github.bestheroz.demo.dtos.admin.AdminCreateDto
+import com.github.bestheroz.demo.dtos.admin.AdminDto
+import com.github.bestheroz.demo.dtos.admin.AdminLoginDto
+import com.github.bestheroz.demo.dtos.admin.AdminUpdateDto
 import com.github.bestheroz.demo.repository.AdminRepository
 import com.github.bestheroz.standard.common.authenticate.JwtTokenProvider
+import com.github.bestheroz.standard.common.domain.service.OperatorHelper
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
-import com.github.bestheroz.standard.common.entity.service.OperatorHelper
 import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
-import com.github.bestheroz.standard.common.util.PasswordUtil.verifyPassword
+import com.github.bestheroz.standard.common.util.PasswordUtil
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -32,7 +37,7 @@ class AdminService(
             .findAllByRemovedFlagIsFalse(
                 PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
             ).map(AdminDto.Response::of)
-            .let { ListResult.of(it) }
+            .let { ListResult.Companion.of(it) }
 
     suspend fun getAdmin(id: Long): AdminDto.Response =
         adminRepository
@@ -121,7 +126,7 @@ class AdminService(
             adminRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
         admin.takeIf { it.removedFlag }?.let { throw RequestException400(ExceptionCode.UNKNOWN_ADMIN) }
         admin.password
-            ?.takeUnless { verifyPassword(request.oldPassword, it) }
+            ?.takeUnless { PasswordUtil.verifyPassword(request.oldPassword, it) }
             ?.let {
                 log.warn("password not match")
                 throw RequestException400(ExceptionCode.INVALID_PASSWORD)
@@ -147,7 +152,7 @@ class AdminService(
             .takeUnless { admin.useFlag }
             ?.let { throw RequestException400(ExceptionCode.UNKNOWN_ADMIN) }
         admin.password
-            ?.takeUnless { verifyPassword(request.password, it) }
+            ?.takeUnless { PasswordUtil.verifyPassword(request.password, it) }
             ?.let {
                 log.warn("password not match")
                 throw RequestException400(ExceptionCode.INVALID_PASSWORD)

@@ -1,17 +1,22 @@
-package com.github.bestheroz.demo.user
+package com.github.bestheroz.demo.services
 
+import com.github.bestheroz.demo.dtos.user.UserChangePasswordDto
+import com.github.bestheroz.demo.dtos.user.UserCreateDto
+import com.github.bestheroz.demo.dtos.user.UserDto
+import com.github.bestheroz.demo.dtos.user.UserLoginDto
+import com.github.bestheroz.demo.dtos.user.UserUpdateDto
 import com.github.bestheroz.demo.repository.UserRepository
 import com.github.bestheroz.standard.common.authenticate.JwtTokenProvider
+import com.github.bestheroz.standard.common.domain.service.OperatorHelper
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.dto.TokenDto
-import com.github.bestheroz.standard.common.entity.service.OperatorHelper
 import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
-import com.github.bestheroz.standard.common.util.PasswordUtil.verifyPassword
+import com.github.bestheroz.standard.common.util.PasswordUtil
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -32,7 +37,7 @@ class UserService(
             .findAllByRemovedFlagIsFalse(
                 PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
             ).map(UserDto.Response::of)
-            .let { ListResult.of(it) }
+            .let { ListResult.Companion.of(it) }
 
     suspend fun getUser(id: Long): UserDto.Response =
         userRepository
@@ -111,7 +116,7 @@ class UserService(
         val user = userRepository.findById(id) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
         user.takeIf { it.removedFlag }?.let { throw RequestException400(ExceptionCode.UNKNOWN_USER) }
         user.password
-            ?.takeUnless { verifyPassword(request.oldPassword, it) }
+            ?.takeUnless { PasswordUtil.verifyPassword(request.oldPassword, it) }
             ?.let {
                 log.warn("password not match")
                 throw RequestException400(ExceptionCode.INVALID_PASSWORD)
@@ -136,7 +141,7 @@ class UserService(
             .takeIf { it.removedFlag || !user.useFlag }
             ?.let { throw RequestException400(ExceptionCode.UNKNOWN_USER) }
         user.password
-            ?.takeUnless { verifyPassword(request.password, it) }
+            ?.takeUnless { PasswordUtil.verifyPassword(request.password, it) }
             ?.let {
                 log.warn("password not match")
                 throw RequestException400(ExceptionCode.INVALID_PASSWORD)
