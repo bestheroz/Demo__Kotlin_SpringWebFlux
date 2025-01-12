@@ -29,7 +29,7 @@ class UserRepositoryCustomImpl(
             .all()
             .collectList()
             .awaitSingle()
-            .let { operatorHelper.fulfilOperator(it) }
+            .apply { operatorHelper.fulfilOperator(this) }
             .let { PageImpl(it, pageable, count) }
     }
 

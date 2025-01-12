@@ -29,8 +29,8 @@ class NoticeService(
     suspend fun getNotice(id: Long): NoticeDto.Response =
         noticeRepository
             .findById(id)
-            ?.let { operatorHelper.fulfilOperator(it) }
-            ?.let { NoticeDto.Response.of(it) } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+            ?.apply { operatorHelper.fulfilOperator(this) }
+            ?.let(NoticeDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
 
     suspend fun createNotice(
         request: NoticeCreateDto.Request,
@@ -38,9 +38,10 @@ class NoticeService(
     ): NoticeDto.Response =
         request
             .toEntity(operator)
-            .let { noticeRepository.save(it) }
-            .let { operatorHelper.fulfilOperator(it) }
-            .let { NoticeDto.Response.of(it) }
+            .apply {
+                noticeRepository.save(this)
+                operatorHelper.fulfilOperator(this)
+            }.let(NoticeDto.Response::of)
 
     suspend fun updateNotice(
         id: Long,
@@ -49,17 +50,19 @@ class NoticeService(
     ): NoticeDto.Response =
         noticeRepository
             .findById(id)
-            ?.let {
-                it.update(request.title, request.content, request.useFlag, operator)
-                noticeRepository.save(it)
-            }?.let { operatorHelper.fulfilOperator(it) }
-            ?.let { NoticeDto.Response.of(it) } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+            ?.apply {
+                update(request.title, request.content, request.useFlag, operator)
+                noticeRepository.save(this)
+                operatorHelper.fulfilOperator(this)
+            }?.let(NoticeDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
 
     suspend fun deleteNotice(
         id: Long,
         operator: Operator,
-    ) = noticeRepository.findById(id)?.let {
-        it.remove(operator)
-        noticeRepository.save(it)
-    } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+    ) {
+        noticeRepository.findById(id)?.apply {
+            remove(operator)
+            noticeRepository.save(this)
+        } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+    }
 }

@@ -7,10 +7,10 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    id("com.google.devtools.ksp") version "2.1.20-Beta1-1.0.29"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "7.0.0.BETA4"
+    id("com.diffplug.spotless") version "7.0.1"
     id("com.github.ben-manes.versions") version "0.51.0"
     idea
 }
@@ -33,8 +33,8 @@ dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib"))
-    implementation("com.google.dagger:dagger-compiler:2.54")
-    ksp("com.google.dagger:dagger-compiler:2.54")
+    implementation("com.google.dagger:dagger-compiler:2.55")
+    ksp("com.google.dagger:dagger-compiler:2.55")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Coroutines
@@ -54,12 +54,12 @@ dependencies {
 
     // Logging and Sentry
     implementation("com.auth0:java-jwt:4.4.0")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.0.0-rc.3")
-    implementation("io.sentry:sentry-logback:8.0.0-rc.3")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.0.0-rc.4")
+    implementation("io.sentry:sentry-logback:8.0.0-rc.4")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.7.0")
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.7.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.1")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.1")
 
     // Utility
     implementation("org.fusesource.jansi:jansi:2.4.1")
