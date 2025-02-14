@@ -3,15 +3,15 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "2.1.0"
+    val kotlinVersion = "2.1.20-Beta2"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.1.20-Beta1-1.0.29"
-    id("org.springframework.boot") version "3.4.1"
+    id("com.google.devtools.ksp") version "2.1.20-Beta2-1.0.29"
+    id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "7.0.1"
-    id("com.github.ben-manes.versions") version "0.51.0"
+    id("com.diffplug.spotless") version "7.0.2"
+    id("com.github.ben-manes.versions") version "0.52.0"
     idea
 }
 
@@ -25,7 +25,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.1")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.2")
     }
 }
 
@@ -53,13 +53,13 @@ dependencies {
     implementation("io.asyncer:r2dbc-mysql")
 
     // Logging and Sentry
-    implementation("com.auth0:java-jwt:4.4.0")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.0.0-rc.4")
-    implementation("io.sentry:sentry-logback:8.0.0-rc.4")
+    implementation("com.auth0:java-jwt:4.5.0")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.2.0")
+    implementation("io.sentry:sentry-logback:8.2.0")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.1")
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.1")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.4")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.4")
 
     // Utility
     implementation("org.fusesource.jansi:jansi:2.4.1")
