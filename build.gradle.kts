@@ -1,6 +1,4 @@
 import org.gradle.kotlin.dsl.invoke
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     val kotlinVersion = "2.1.20-Beta2"
@@ -17,7 +15,11 @@ plugins {
 
 group = "com.github.bestheroz"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 repositories {
     mavenCentral()
@@ -73,15 +75,11 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.withType<KotlinCompile> {
+kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
-        jvmTarget.set(JvmTarget.JVM_21)
-        //        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
-        //        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
     }
 }
-
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
