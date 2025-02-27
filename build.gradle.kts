@@ -6,7 +6,7 @@ plugins {
     kotlin("plugin.spring") version kotlinVersion
 
     id("com.google.devtools.ksp") version "2.1.20-RC-1.0.30"
-    id("org.springframework.boot") version "3.4.2"
+    id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "7.0.2"
     id("com.github.ben-manes.versions") version "0.52.0"
@@ -27,7 +27,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.2")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.3")
     }
 }
 
@@ -52,12 +52,12 @@ dependencies {
     implementation("org.apache.commons:commons-lang3")
 
     // Database
-    implementation("io.asyncer:r2dbc-mysql:1.3.2")
+    implementation("io.asyncer:r2dbc-mysql:1.4.0")
 
     // Logging and Sentry
     implementation("com.auth0:java-jwt:4.5.0")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.2.0")
-    implementation("io.sentry:sentry-logback:8.2.0")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.3.0")
+    implementation("io.sentry:sentry-logback:8.3.0")
 
     // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.5")
