@@ -27,7 +27,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.3")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.4")
     }
 }
 
@@ -60,8 +60,8 @@ dependencies {
     implementation("io.sentry:sentry-logback:8.5.0")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.5")
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.5")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.6")
 
     // Utility
     implementation("org.fusesource.jansi:jansi:2.4.1")
