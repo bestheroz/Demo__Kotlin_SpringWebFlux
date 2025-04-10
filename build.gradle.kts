@@ -65,14 +65,6 @@ dependencies {
 
     // Utility
     implementation("org.fusesource.jansi:jansi:2.4.1")
-
-    // Test
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
 
 kotlin {
