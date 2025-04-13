@@ -1,23 +1,25 @@
 import org.gradle.kotlin.dsl.invoke
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "2.1.0"
+    val kotlinVersion = "2.1.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.1.20-Beta1-1.0.29"
-    id("org.springframework.boot") version "3.4.1"
+    id("com.google.devtools.ksp") version "2.1.20-2.0.0"
+    id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "7.0.1"
-    id("com.github.ben-manes.versions") version "0.51.0"
+    id("com.diffplug.spotless") version "7.0.3"
+    id("com.github.ben-manes.versions") version "0.52.0"
     idea
 }
 
 group = "com.github.bestheroz"
-version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_21
+version = "0.0.1"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 repositories {
     mavenCentral()
@@ -25,7 +27,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.1")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.4")
     }
 }
 
@@ -33,13 +35,13 @@ dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib"))
-    implementation("com.google.dagger:dagger-compiler:2.55")
-    ksp("com.google.dagger:dagger-compiler:2.55")
+    implementation("com.google.dagger:dagger-compiler:2.56.1")
+    ksp("com.google.dagger:dagger-compiler:2.56.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.2")
 
     // Spring
     implementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -50,38 +52,26 @@ dependencies {
     implementation("org.apache.commons:commons-lang3")
 
     // Database
-    implementation("io.asyncer:r2dbc-mysql")
+    implementation("io.asyncer:r2dbc-mysql:1.4.0")
 
     // Logging and Sentry
-    implementation("com.auth0:java-jwt:4.4.0")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.0.0-rc.4")
-    implementation("io.sentry:sentry-logback:8.0.0-rc.4")
+    implementation("com.auth0:java-jwt:4.5.0")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.7.0")
+    implementation("io.sentry:sentry-logback:8.7.0")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.1")
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.1")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.6")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.6")
 
     // Utility
     implementation("org.fusesource.jansi:jansi:2.4.1")
-
-    // Test
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
-tasks.withType<KotlinCompile> {
+kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
-        jvmTarget.set(JvmTarget.JVM_21)
-        //        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
-        //        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
     }
 }
-
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
