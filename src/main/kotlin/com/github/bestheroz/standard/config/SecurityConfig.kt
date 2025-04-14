@@ -34,6 +34,8 @@ class SecurityConfig(
                     .permitAll()
                     .pathMatchers(HttpMethod.POST, *POST_PUBLIC)
                     .permitAll()
+                    .pathMatchers(HttpMethod.DELETE, *DELETE_PUBLIC)
+                    .permitAll()
                     .anyExchange()
                     .authenticated()
             }.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
@@ -72,6 +74,7 @@ class SecurityConfig(
                 "/api/v1/users/check-login-id",
                 "/api/v1/users/renew-token",
             )
-        val POST_PUBLIC = arrayOf("/api/v1/admins/login", "/api/v1/users/login")
+        val POST_PUBLIC: Array<String> = arrayOf("/api/v1/login")
+        val DELETE_PUBLIC: Array<String> = arrayOf("/api/v1/logout")
     }
 }

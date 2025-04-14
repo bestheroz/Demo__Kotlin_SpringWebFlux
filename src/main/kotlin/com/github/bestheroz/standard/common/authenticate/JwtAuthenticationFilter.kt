@@ -31,6 +31,7 @@ class JwtAuthenticationFilter(
 
     private val publicGetPaths = SecurityConfig.GET_PUBLIC.map { PathPatternParser().parse(it) }
     private val publicPostPaths = SecurityConfig.POST_PUBLIC.map { PathPatternParser().parse(it) }
+    private val publicDeletePaths = SecurityConfig.DELETE_PUBLIC.map { PathPatternParser().parse(it) }
 
     override fun filter(
         exchange: ServerWebExchange,
@@ -103,6 +104,7 @@ class JwtAuthenticationFilter(
             when (request.method) {
                 HttpMethod.GET -> publicGetPaths.any { it.matches(path) }
                 HttpMethod.POST -> publicPostPaths.any { it.matches(path) }
+                HttpMethod.DELETE -> publicDeletePaths.any { it.matches(path) }
                 else -> false
             },
         )
