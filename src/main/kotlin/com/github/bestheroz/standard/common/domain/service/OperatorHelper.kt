@@ -7,6 +7,9 @@ import com.github.bestheroz.demo.repository.OperatorHelperUserRepository
 import com.github.bestheroz.standard.common.domain.IdCreated
 import com.github.bestheroz.standard.common.domain.IdCreatedUpdated
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,37 +17,44 @@ class OperatorHelper(
     private val adminRepository: OperatorHelperAdminRepository,
     private val userRepository: OperatorHelperUserRepository,
 ) {
-    suspend fun <T : IdCreatedUpdated> fulfilOperator(operators: List<T>): List<T> {
-        if (operators.isEmpty()) return operators
-        val adminIds = HashSet<Long>()
-        val userIds = HashSet<Long>()
+    suspend fun <T : IdCreatedUpdated> fulfilOperator(operators: List<T>): List<T> =
+        coroutineScope {
+            if (operators.isEmpty()) return@coroutineScope operators
+            val adminIds = HashSet<Long>()
+            val userIds = HashSet<Long>()
 
-        collectIds(operators, adminIds, userIds, true)
+            collectIds(operators, adminIds, userIds, true)
 
-        val adminMap = fetchAdminMap(adminIds)
-        val userMap = fetchUserMap(userIds)
+            val adminMapDeferred = async(Dispatchers.IO) { fetchAdminMap(adminIds) }
+            val userMapDeferred = async(Dispatchers.IO) { fetchUserMap(userIds) }
 
-        setOperatorData(operators, adminMap, userMap, true)
+            setOperatorData(operators, adminMapDeferred.await(), userMapDeferred.await(), true)
 
-        return operators
-    }
+            operators
+        }
 
     suspend fun <T : IdCreatedUpdated> fulfilOperator(operator: T): T = fulfilOperator(listOf(operator)).first()
 
-    suspend fun <T : IdCreated> fulfilCreatedOperator(operators: List<T>): List<T> {
-        if (operators.isEmpty()) return operators
-        val adminIds = HashSet<Long>()
-        val userIds = HashSet<Long>()
+    suspend fun <T : IdCreated> fulfilCreatedOperator(operators: List<T>): List<T> =
+        coroutineScope {
+            if (operators.isEmpty()) return@coroutineScope operators
+            val adminIds = HashSet<Long>()
+            val userIds = HashSet<Long>()
 
-        collectIds(operators, adminIds, userIds, false)
+            collectIds(operators, adminIds, userIds, false)
 
-        val adminMap = fetchAdminMap(adminIds)
-        val userMap = fetchUserMap(userIds)
+            val adminMapDeferred = async(Dispatchers.IO) { fetchAdminMap(adminIds) }
+            val userMapDeferred = async(Dispatchers.IO) { fetchUserMap(userIds) }
 
-        setOperatorData(operators, adminMap, userMap, false)
+            setOperatorData(
+                operators,
+                adminMapDeferred.await(),
+                userMapDeferred.await(),
+                includeUpdated = false,
+            )
 
-        return operators
-    }
+            operators
+        }
 
     suspend fun <T : IdCreated> fulfilCreatedOperator(operator: T): T = fulfilCreatedOperator(listOf(operator)).first()
 

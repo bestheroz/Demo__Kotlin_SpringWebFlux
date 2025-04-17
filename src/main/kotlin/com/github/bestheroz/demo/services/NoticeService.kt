@@ -8,6 +8,8 @@ import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.security.Operator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -21,17 +23,17 @@ class NoticeService(
 ) {
     @Transactional(readOnly = true)
     suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> =
-        noticeRepository
-            .findAllByRemovedFlagIsFalse(
+        withContext(Dispatchers.IO) {
+            noticeRepository.findAllByRemovedFlagIsFalse(
                 PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
-            ).map(NoticeDto.Response::of)
+            )
+        }.map(NoticeDto.Response::of)
             .let { ListResult.Companion.of(it) }
 
     @Transactional(readOnly = true)
     suspend fun getNotice(id: Long): NoticeDto.Response =
-        noticeRepository
-            .findById(id)
-            ?.apply { operatorHelper.fulfilOperator(this) }
+        withContext(Dispatchers.IO) { noticeRepository.findById(id) }
+            ?.let { operatorHelper.fulfilOperator(it) }
             ?.let(NoticeDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
 
     suspend fun createNotice(
@@ -40,9 +42,9 @@ class NoticeService(
     ): NoticeDto.Response =
         request
             .toEntity(operator)
-            .apply {
-                noticeRepository.save(this)
-                operatorHelper.fulfilOperator(this)
+            .let {
+                withContext(Dispatchers.IO) { noticeRepository.save(it) }
+                operatorHelper.fulfilOperator(it)
             }.let(NoticeDto.Response::of)
 
     suspend fun updateNotice(
@@ -50,21 +52,20 @@ class NoticeService(
         request: NoticeCreateDto.Request,
         operator: Operator,
     ): NoticeDto.Response =
-        noticeRepository
-            .findById(id)
-            ?.apply {
-                update(request.title, request.content, request.useFlag, operator)
-                noticeRepository.save(this)
-                operatorHelper.fulfilOperator(this)
+        withContext(Dispatchers.IO) { noticeRepository.findById(id) }
+            ?.let {
+                it.update(request.title, request.content, request.useFlag, operator)
+                withContext(Dispatchers.IO) { noticeRepository.save(it) }
+                operatorHelper.fulfilOperator(it)
             }?.let(NoticeDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
 
     suspend fun deleteNotice(
         id: Long,
         operator: Operator,
     ) {
-        noticeRepository.findById(id)?.apply {
-            remove(operator)
-            noticeRepository.save(this)
+        noticeRepository.findById(id)?.let {
+            it.remove(operator)
+            withContext(Dispatchers.IO) { noticeRepository.save(it) }
         } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
     }
 }

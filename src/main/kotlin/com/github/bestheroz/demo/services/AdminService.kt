@@ -20,6 +20,7 @@ import com.github.bestheroz.standard.common.util.PasswordUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -37,16 +38,16 @@ class AdminService(
     }
 
     suspend fun getAdminList(request: AdminDto.Request): ListResult<AdminDto.Response> =
-        adminRepository
-            .findAllByRemovedFlagIsFalse(
+        withContext(Dispatchers.IO) {
+            adminRepository.findAllByRemovedFlagIsFalse(
                 PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
-            ).map(AdminDto.Response::of)
+            )
+        }.map(AdminDto.Response::of)
             .let(ListResult.Companion::of)
 
     suspend fun getAdmin(id: Long): AdminDto.Response =
-        adminRepository
-            .findById(id)
-            ?.apply { operatorHelper.fulfilOperator(this) }
+        withContext(Dispatchers.IO) { adminRepository.findById(id) }
+            ?.let { operatorHelper.fulfilOperator(it) }
             ?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
 
     @Transactional
@@ -54,14 +55,14 @@ class AdminService(
         request: AdminCreateDto.Request,
         operator: Operator,
     ): AdminDto.Response {
-        adminRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)?.let {
-            throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
-        }
+        withContext(Dispatchers.IO) {
+            adminRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)
+        }?.also { throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT) }
         return request
             .toEntity(operator)
-            .apply {
-                adminRepository.save(this)
-                operatorHelper.fulfilOperator(this)
+            .let {
+                withContext(Dispatchers.IO) { adminRepository.save(it) }
+                operatorHelper.fulfilOperator(it)
             }.let(AdminDto.Response::of)
     }
 
@@ -78,6 +79,7 @@ class AdminService(
         val userDeferred = coroutineScope.async(Dispatchers.IO) { adminRepository.findById(id) }
 
         existsDeferred.await().let {
+            userDeferred.cancel()
             if (it) throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
         }
 
@@ -91,8 +93,8 @@ class AdminService(
                 if (!it.managerFlag && !request.managerFlag && !operator.managerFlag) {
                     throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY)
                 }
-            }?.apply {
-                update(
+            }?.let {
+                it.update(
                     request.loginId,
                     request.password,
                     request.name,
@@ -101,8 +103,8 @@ class AdminService(
                     request.authorities,
                     operator,
                 )
-                adminRepository.save(this)
-                operatorHelper.fulfilOperator(this)
+                withContext(Dispatchers.IO) { adminRepository.save(it) }
+                operatorHelper.fulfilOperator(it)
             }?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
@@ -111,14 +113,13 @@ class AdminService(
         id: Long,
         operator: Operator,
     ) {
-        adminRepository
-            .findById(id)
+        withContext(Dispatchers.IO) { adminRepository.findById(id) }
             ?.also {
                 if (it.removedFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
                 if (it.id == operator.id) throw RequestException400(ExceptionCode.CANNOT_REMOVE_YOURSELF)
-            }?.apply {
-                remove(operator)
-                adminRepository.save(this)
+            }?.let {
+                it.remove(operator)
+                withContext(Dispatchers.IO) { adminRepository.save(it) }
             } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
@@ -131,8 +132,7 @@ class AdminService(
         if (operator.id != id && !operator.authorities.contains(AuthorityEnum.ADMIN_EDIT)) {
             throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY)
         }
-        return adminRepository
-            .findById(id)
+        return withContext(Dispatchers.IO) { adminRepository.findById(id) }
             ?.also {
                 if (it.removedFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
                 it.password
@@ -144,64 +144,69 @@ class AdminService(
                 it.password
                     ?.takeIf { it == request.newPassword }
                     ?.let { throw RequestException400(ExceptionCode.CHANGE_TO_SAME_PASSWORD) }
-            }?.apply {
-                changePassword(request.newPassword, operator)
-                adminRepository.save(this)
-                operatorHelper.fulfilOperator(this)
+            }?.let {
+                it.changePassword(request.newPassword, operator)
+                withContext(Dispatchers.IO) { adminRepository.save(it) }
+                operatorHelper.fulfilOperator(it)
             }?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
     @Transactional
     suspend fun loginAdmin(request: AdminLoginDto.Request): TokenDto =
-        adminRepository
-            .findByLoginIdAndRemovedFlagFalse(request.loginId)
-            ?.also {
-                if (!it.useFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
-                it.password
-                    ?.takeUnless { PasswordUtil.isPasswordValid(request.password, it) }
-                    ?.let {
-                        log.warn("password not match")
-                        throw RequestException400(ExceptionCode.INVALID_PASSWORD)
-                    }
-            }?.apply {
-                renewToken(jwtTokenProvider.createRefreshToken(Operator(this)))
-                adminRepository.save(this)
-            }?.let { TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token ?: "") }
+        withContext(Dispatchers.IO) {
+            adminRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)
+        }?.also {
+            if (!it.useFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
+            it.password
+                ?.takeUnless { PasswordUtil.isPasswordValid(request.password, it) }
+                ?.let {
+                    log.warn("password not match")
+                    throw RequestException400(ExceptionCode.INVALID_PASSWORD)
+                }
+        }?.let {
+            it.renewToken(jwtTokenProvider.createRefreshToken(Operator(it)))
+            withContext(Dispatchers.IO) { adminRepository.save(it) }
+        }?.let { TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token ?: "") }
             ?: throw RequestException400(ExceptionCode.UNJOINED_ACCOUNT)
 
     @Transactional
     suspend fun renewToken(refreshToken: String): TokenDto {
-        return adminRepository
-            .findById(jwtTokenProvider.getId(refreshToken))
-            ?.also {
-                if (it.removedFlag || it.token == null || !jwtTokenProvider.validateToken(refreshToken)) {
-                    throw AuthenticationException401()
-                }
-            }?.apply {
-                if (this.token == refreshToken) {
-                    renewToken(jwtTokenProvider.createRefreshToken(Operator(this)))
-                    adminRepository.save(this)
-                }
-            }?.let {
-                if (
-                    jwtTokenProvider.issuedRefreshTokenIn3Seconds(it.token ?: "") || it.token == refreshToken
-                ) {
-                    return TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token ?: "")
-                }
+        return withContext(Dispatchers.IO) {
+            adminRepository.findById(jwtTokenProvider.getId(refreshToken))
+        }?.also {
+            if (it.removedFlag || it.token == null || !jwtTokenProvider.validateToken(refreshToken)) {
                 throw AuthenticationException401()
-            } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
+            }
+        }?.let {
+            if (it.token == refreshToken) {
+                it.renewToken(jwtTokenProvider.createRefreshToken(Operator(it)))
+                withContext(Dispatchers.IO) { adminRepository.save(it) }
+            }
+            it
+        }?.let {
+            if (
+                jwtTokenProvider.issuedRefreshTokenIn3Seconds(it.token ?: "") || it.token == refreshToken
+            ) {
+                return TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token ?: "")
+            }
+            throw AuthenticationException401()
+        } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
     @Transactional
     suspend fun logout(id: Long) {
-        adminRepository.findById(id)?.let {
-            it.logout()
-            adminRepository.save(it)
-        } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
+        withContext(Dispatchers.IO) { adminRepository.findById(id) }
+            ?.let {
+                it.logout()
+                withContext(Dispatchers.IO) { adminRepository.save(it) }
+            } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,
-    ): Boolean = !adminRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id)
+    ): Boolean =
+        !withContext(Dispatchers.IO) {
+            adminRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(loginId, id)
+        }
 }
