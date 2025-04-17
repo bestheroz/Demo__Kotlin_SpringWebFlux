@@ -1,5 +1,7 @@
-package com.github.bestheroz.demo.dtos.notice
+package com.github.bestheroz.demo.services
 
+import com.github.bestheroz.demo.dtos.notice.NoticeCreateDto
+import com.github.bestheroz.demo.dtos.notice.NoticeDto
 import com.github.bestheroz.demo.repository.NoticeRepository
 import com.github.bestheroz.standard.common.domain.service.OperatorHelper
 import com.github.bestheroz.standard.common.dto.ListResult
@@ -23,7 +25,7 @@ class NoticeService(
             .findAllByRemovedFlagIsFalse(
                 PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
             ).map(NoticeDto.Response::of)
-            .let { ListResult.of(it) }
+            .let { ListResult.Companion.of(it) }
 
     @Transactional(readOnly = true)
     suspend fun getNotice(id: Long): NoticeDto.Response =

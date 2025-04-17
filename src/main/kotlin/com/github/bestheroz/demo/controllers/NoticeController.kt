@@ -2,7 +2,7 @@ package com.github.bestheroz.demo.controllers
 
 import com.github.bestheroz.demo.dtos.notice.NoticeCreateDto
 import com.github.bestheroz.demo.dtos.notice.NoticeDto
-import com.github.bestheroz.demo.dtos.notice.NoticeService
+import com.github.bestheroz.demo.services.NoticeService
 import com.github.bestheroz.standard.common.dto.ListResult
 import com.github.bestheroz.standard.common.security.Operator
 import io.swagger.v3.oas.annotations.Operation
