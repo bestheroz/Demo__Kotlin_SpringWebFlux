@@ -2,10 +2,8 @@ package com.github.bestheroz.demo.domain
 
 import com.github.bestheroz.standard.common.domain.IdCreatedUpdated
 import com.github.bestheroz.standard.common.security.Operator
-import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
-@Table("notices")
 data class Notice(
     var title: String,
     var content: String,

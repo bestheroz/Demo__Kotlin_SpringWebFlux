@@ -6,10 +6,8 @@ import com.github.bestheroz.standard.common.enums.UserTypeEnum
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil.getPasswordHash
 import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 
-@Table(value = "admins")
 data class Admin(
     var loginId: String = "",
     var password: String? = null,
