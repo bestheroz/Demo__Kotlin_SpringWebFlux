@@ -39,9 +39,9 @@ class AdminService(
 
     suspend fun getAdminList(request: AdminDto.Request): ListResult<AdminDto.Response> =
         withContext(Dispatchers.IO) {
-            adminRepository.findAllByRemovedFlagIsFalse(
-                PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
-            )
+            val pageable =
+                PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending())
+            adminRepository.findAllWithConditions(request, pageable)
         }.map(AdminDto.Response::of)
             .let(ListResult.Companion::of)
 
