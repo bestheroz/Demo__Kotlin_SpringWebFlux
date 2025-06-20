@@ -24,11 +24,11 @@ class NoticeService(
     @Transactional(readOnly = true)
     suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> =
         withContext(Dispatchers.IO) {
-            noticeRepository.findAllByRemovedFlagIsFalse(
-                PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
-            )
+            val pageable =
+                PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending())
+            noticeRepository.findAllWithConditions(request, pageable)
         }.map(NoticeDto.Response::of)
-            .let { ListResult.Companion.of(it) }
+            .let(ListResult.Companion::of)
 
     @Transactional(readOnly = true)
     suspend fun getNotice(id: Long): NoticeDto.Response =

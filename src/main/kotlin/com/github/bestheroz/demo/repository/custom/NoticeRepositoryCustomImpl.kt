@@ -1,6 +1,7 @@
 package com.github.bestheroz.demo.repository.custom
 
 import com.github.bestheroz.demo.domain.Notice
+import com.github.bestheroz.demo.dtos.notice.NoticeDto
 import com.github.bestheroz.standard.common.domain.service.OperatorHelper
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.domain.Page
@@ -14,22 +15,32 @@ class NoticeRepositoryCustomImpl(
     private val template: R2dbcEntityTemplate,
     private val operatorHelper: OperatorHelper,
 ) : NoticeRepositoryCustom {
-    override suspend fun findAllByRemovedFlagIsFalse(pageable: Pageable): Page<Notice> {
-        val query = Query.query(Criteria.where("removed_flag").`is`(false))
+    override suspend fun findAllWithConditions(
+        request: NoticeDto.Request,
+        pageable: Pageable,
+    ): Page<Notice> {
+        val criteria = buildCriteria(request)
+        val query = Query.query(criteria).with(pageable)
 
-        val count = template.count(query, Notice::class.java).awaitSingle()
+        val content =
+            template.select(Notice::class.java).matching(query).all().collectList().awaitSingle().apply {
+                operatorHelper.fulfilOperator(this)
+            }
 
-        if (count == 0L) {
-            return PageImpl(emptyList(), pageable, 0)
-        }
+        val total = template.count(Query.query(criteria), Notice::class.java).awaitSingle()
 
-        return template
-            .select(Notice::class.java)
-            .matching(query.with(pageable))
-            .all()
-            .collectList()
-            .awaitSingle()
-            .apply { operatorHelper.fulfilOperator(this) }
-            .let { PageImpl(it, pageable, count) }
+        return PageImpl(content, pageable, total)
+    }
+
+    private fun buildCriteria(request: NoticeDto.Request): Criteria {
+        var criteria = Criteria.where("removed_flag").`is`(false)
+
+        request.id?.let { criteria = criteria.and("id").`is`(it) }
+
+        request.title?.let { criteria = criteria.and("title").like("%$it%") }
+
+        request.useFlag?.let { criteria = criteria.and("use_flag").`is`(it) }
+
+        return criteria
     }
 }
