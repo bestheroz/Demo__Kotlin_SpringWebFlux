@@ -39,10 +39,7 @@ class UserController(
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('USER_VIEW')")
-    suspend fun getUserList(
-        @Schema(example = "1") @RequestParam page: Int,
-        @Schema(example = "10") @RequestParam pageSize: Int,
-    ): ListResult<UserDto.Response> = userService.getUserList(UserDto.Request(page, pageSize))
+    suspend fun getUserList(request: UserDto.Request): ListResult<UserDto.Response> = userService.getUserList(request)
 
     @GetMapping("check-login-id")
     @Operation(summary = "로그인 아이디 중복 확인")

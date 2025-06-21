@@ -1,6 +1,7 @@
 package com.github.bestheroz.demo.repository.custom
 
 import com.github.bestheroz.demo.domain.User
+import com.github.bestheroz.demo.dtos.user.UserDto
 import com.github.bestheroz.standard.common.domain.service.OperatorHelper
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.domain.Page
@@ -14,23 +15,26 @@ class UserRepositoryCustomImpl(
     private val template: R2dbcEntityTemplate,
     private val operatorHelper: OperatorHelper,
 ) : UserRepositoryCustom {
-    override suspend fun findAllByRemovedFlagIsFalse(pageable: Pageable): Page<User> {
-        val query = Query.query(Criteria.where("removed_flag").`is`(false))
+    override suspend fun findAllWithConditions(
+        request: UserDto.Request,
+        pageable: Pageable,
+    ): Page<User> {
+        val criteria = buildCriteria(request)
+        val query = Query.query(criteria).with(pageable)
+        val content =
+            template.select(User::class.java).matching(query).all().collectList().awaitSingle().apply {
+                operatorHelper.fulfilOperator(this)
+            }
+        val total = template.count(Query.query(criteria), User::class.java).awaitSingle()
+        return PageImpl(content, pageable, total)
+    }
 
-        val count = template.count(query, User::class.java).awaitSingle()
-
-        if (count == 0L) {
-            return PageImpl(emptyList(), pageable, 0)
-        }
-
-        return template
-            .select(User::class.java)
-            .matching(query.with(pageable))
-            .all()
-            .collectList()
-            .awaitSingle()
-            .apply { operatorHelper.fulfilOperator(this) }
-            .let { PageImpl(it, pageable, count) }
+    private fun buildCriteria(request: UserDto.Request): Criteria {
+        var criteria = Criteria.where("removed_flag").`is`(false)
+        request.id?.let { criteria = criteria.and("id").`is`(it) }
+        request.loginId?.let { criteria = criteria.and("login_id").like("%$it%") }
+        request.name?.let { criteria = criteria.and("name").like("%$it%") }
+        return criteria
     }
 
     override suspend fun existsByLoginIdAndRemovedFlagFalseAndIdNot(
