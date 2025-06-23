@@ -34,11 +34,11 @@ class UserService(
 
     suspend fun getUserList(request: UserDto.Request): ListResult<UserDto.Response> =
         withContext(Dispatchers.IO) {
-            userRepository
-                .findAllByRemovedFlagIsFalse(
-                    PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending()),
-                ).map(UserDto.Response::of)
-        }.let(ListResult.Companion::of)
+            val pageable =
+                PageRequest.of(request.page - 1, request.pageSize, Sort.by("id").descending())
+            userRepository.findAllWithConditions(request, pageable)
+        }.map(UserDto.Response::of)
+            .let(ListResult.Companion::of)
 
     suspend fun getUser(id: Long): UserDto.Response =
         withContext(Dispatchers.IO) { userRepository.findById(id) }

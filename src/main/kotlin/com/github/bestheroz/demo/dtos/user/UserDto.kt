@@ -13,6 +13,11 @@ class UserDto {
         val page: Int,
         @Schema(description = "페이지 크기", example = "10", requiredMode = Schema.RequiredMode.REQUIRED)
         val pageSize: Int,
+        @Schema(description = "ID(KEY)", requiredMode = Schema.RequiredMode.NOT_REQUIRED) val id: Long?,
+        @Schema(description = "로그인 아이디", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        val loginId: String?,
+        @Schema(description = "유저 이름", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        val name: String?,
     )
 
     data class Response(
