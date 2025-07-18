@@ -17,9 +17,9 @@ import com.github.bestheroz.standard.common.exception.RequestException400
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -32,7 +32,6 @@ class AdminService(
     private val adminRepository: AdminRepository,
     private val operatorHelper: OperatorHelper,
     private val jwtTokenProvider: JwtTokenProvider,
-    private val coroutineScope: CoroutineScope,
 ) {
     companion object {
         private val log = logger()
@@ -72,44 +71,45 @@ class AdminService(
         id: Long,
         request: AdminUpdateDto.Request,
         operator: Operator,
-    ): AdminDto.Response {
-        val existsDeferred =
-            coroutineScope.async(Dispatchers.IO) {
-                adminRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id)
-            }
-        val userDeferred = coroutineScope.async(Dispatchers.IO) { adminRepository.findById(id) }
+    ): AdminDto.Response =
+        coroutineScope {
+            val existsDeferred =
+                async(Dispatchers.IO) {
+                    adminRepository.existsByLoginIdAndRemovedFlagFalseAndIdNot(request.loginId, id)
+                }
+            val userDeferred = async(Dispatchers.IO) { adminRepository.findById(id) }
 
-        existsDeferred.await().let {
-            if (it) {
-                userDeferred.cancel()
-                throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
+            existsDeferred.await().let {
+                if (it) {
+                    userDeferred.cancel()
+                    throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
+                }
             }
+
+            userDeferred
+                .await()
+                ?.also {
+                    if (it.removedFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
+                    if (!request.managerFlag && it.id == operator.id) {
+                        throw RequestException400(ExceptionCode.CANNOT_UPDATE_YOURSELF)
+                    }
+                    if (!it.managerFlag && !request.managerFlag && !operator.managerFlag) {
+                        throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY)
+                    }
+                }?.let {
+                    it.update(
+                        request.loginId,
+                        request.password,
+                        request.name,
+                        request.useFlag,
+                        request.managerFlag,
+                        request.authorities,
+                        operator,
+                    )
+                    withContext(Dispatchers.IO) { adminRepository.save(it) }
+                    operatorHelper.fulfilOperator(it)
+                }?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
         }
-
-        return userDeferred
-            .await()
-            ?.also {
-                if (it.removedFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
-                if (!request.managerFlag && it.id == operator.id) {
-                    throw RequestException400(ExceptionCode.CANNOT_UPDATE_YOURSELF)
-                }
-                if (!it.managerFlag && !request.managerFlag && !operator.managerFlag) {
-                    throw RequestException400(ExceptionCode.UNKNOWN_AUTHORITY)
-                }
-            }?.let {
-                it.update(
-                    request.loginId,
-                    request.password,
-                    request.name,
-                    request.useFlag,
-                    request.managerFlag,
-                    request.authorities,
-                    operator,
-                )
-                withContext(Dispatchers.IO) { adminRepository.save(it) }
-                operatorHelper.fulfilOperator(it)
-            }?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
-    }
 
     @Transactional
     suspend fun deleteAdmin(
