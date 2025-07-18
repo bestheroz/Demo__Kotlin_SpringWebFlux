@@ -63,9 +63,10 @@ class NoticeService(
         id: Long,
         operator: Operator,
     ) {
-        noticeRepository.findById(id)?.let {
-            it.remove(operator)
-            withContext(Dispatchers.IO) { noticeRepository.save(it) }
-        } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
+        withContext(Dispatchers.IO) { noticeRepository.findById(id) }
+            ?.let {
+                it.remove(operator)
+                withContext(Dispatchers.IO) { noticeRepository.save(it) }
+            } ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
     }
 }
