@@ -74,8 +74,10 @@ class UserService(
             val userDeferred = async(Dispatchers.IO) { userRepository.findById(id) }
 
             existsDeferred.await().let {
-                userDeferred.cancel()
-                if (it) throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
+                if (it) {
+                    userDeferred.cancel()
+                    throw RequestException400(ExceptionCode.ALREADY_JOINED_ACCOUNT)
+                }
             }
 
             userDeferred
