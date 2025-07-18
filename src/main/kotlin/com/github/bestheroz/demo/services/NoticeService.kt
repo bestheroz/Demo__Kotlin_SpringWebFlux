@@ -16,12 +16,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
 class NoticeService(
     private val noticeRepository: NoticeRepository,
     private val operatorHelper: OperatorHelper,
 ) {
-    @Transactional(readOnly = true)
     suspend fun getNoticeList(request: NoticeDto.Request): ListResult<NoticeDto.Response> =
         withContext(Dispatchers.IO) {
             val pageable =
@@ -30,12 +28,12 @@ class NoticeService(
         }.map(NoticeDto.Response::of)
             .let(ListResult.Companion::of)
 
-    @Transactional(readOnly = true)
     suspend fun getNotice(id: Long): NoticeDto.Response =
         withContext(Dispatchers.IO) { noticeRepository.findById(id) }
             ?.let { operatorHelper.fulfilOperator(it) }
             ?.let(NoticeDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
 
+    @Transactional
     suspend fun createNotice(
         request: NoticeCreateDto.Request,
         operator: Operator,
@@ -47,6 +45,7 @@ class NoticeService(
                 operatorHelper.fulfilOperator(it)
             }.let(NoticeDto.Response::of)
 
+    @Transactional
     suspend fun updateNotice(
         id: Long,
         request: NoticeCreateDto.Request,
@@ -59,6 +58,7 @@ class NoticeService(
                 operatorHelper.fulfilOperator(it)
             }?.let(NoticeDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_NOTICE)
 
+    @Transactional
     suspend fun deleteNotice(
         id: Long,
         operator: Operator,
