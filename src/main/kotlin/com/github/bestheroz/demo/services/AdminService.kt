@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class AdminService(
     private val adminRepository: AdminRepository,
     private val operatorHelper: OperatorHelper,
@@ -37,6 +38,7 @@ class AdminService(
         private val log = logger()
     }
 
+    @Transactional(readOnly = true)
     suspend fun getAdminList(request: AdminDto.Request): ListResult<AdminDto.Response> =
         withContext(Dispatchers.IO) {
             val pageable =
@@ -45,12 +47,12 @@ class AdminService(
         }.map(AdminDto.Response::of)
             .let(ListResult.Companion::of)
 
+    @Transactional(readOnly = true)
     suspend fun getAdmin(id: Long): AdminDto.Response =
         withContext(Dispatchers.IO) { adminRepository.findById(id) }
             ?.let { operatorHelper.fulfilOperator(it) }
             ?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
 
-    @Transactional
     suspend fun createAdmin(
         request: AdminCreateDto.Request,
         operator: Operator,
@@ -66,7 +68,6 @@ class AdminService(
             }.let(AdminDto.Response::of)
     }
 
-    @Transactional
     suspend fun updateAdmin(
         id: Long,
         request: AdminUpdateDto.Request,
@@ -110,7 +111,6 @@ class AdminService(
             }?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
-    @Transactional
     suspend fun deleteAdmin(
         id: Long,
         operator: Operator,
@@ -125,7 +125,6 @@ class AdminService(
             } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
-    @Transactional
     suspend fun changePassword(
         id: Long,
         request: AdminChangePasswordDto.Request,
@@ -153,7 +152,6 @@ class AdminService(
             }?.let(AdminDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
-    @Transactional
     suspend fun loginAdmin(request: AdminLoginDto.Request): TokenDto =
         withContext(Dispatchers.IO) {
             adminRepository.findByLoginIdAndRemovedFlagFalse(request.loginId)
@@ -171,7 +169,6 @@ class AdminService(
         }?.let { TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token ?: "") }
             ?: throw RequestException400(ExceptionCode.UNJOINED_ACCOUNT)
 
-    @Transactional
     suspend fun renewToken(refreshToken: String): TokenDto {
         return withContext(Dispatchers.IO) {
             adminRepository.findById(jwtTokenProvider.getId(refreshToken))
@@ -195,7 +192,6 @@ class AdminService(
         } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
-    @Transactional
     suspend fun logout(id: Long) {
         withContext(Dispatchers.IO) { adminRepository.findById(id) }
             ?.let {
@@ -204,6 +200,7 @@ class AdminService(
             } ?: throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
     }
 
+    @Transactional(readOnly = true)
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,

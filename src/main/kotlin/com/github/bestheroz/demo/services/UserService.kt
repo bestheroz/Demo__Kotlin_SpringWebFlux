@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class UserService(
     private val userRepository: UserRepository,
     private val operatorHelper: OperatorHelper,
@@ -32,6 +33,7 @@ class UserService(
         private val log = logger()
     }
 
+    @Transactional(readOnly = true)
     suspend fun getUserList(request: UserDto.Request): ListResult<UserDto.Response> =
         withContext(Dispatchers.IO) {
             val pageable =
@@ -45,7 +47,6 @@ class UserService(
             ?.let { operatorHelper.fulfilOperator(it) }
             ?.let(UserDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
 
-    @Transactional
     suspend fun createUser(
         request: UserCreateDto.Request,
         operator: Operator,
@@ -60,7 +61,6 @@ class UserService(
             }.let(UserDto.Response::of)
     }
 
-    @Transactional
     suspend fun updateUser(
         id: Long,
         request: UserUpdateDto.Request,
@@ -97,7 +97,6 @@ class UserService(
                 }?.let(UserDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
         }
 
-    @Transactional
     suspend fun deleteUser(
         id: Long,
         operator: Operator,
@@ -112,7 +111,6 @@ class UserService(
             } ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
     }
 
-    @Transactional
     suspend fun changePassword(
         id: Long,
         request: UserChangePasswordDto.Request,
@@ -140,7 +138,6 @@ class UserService(
             }?.let(UserDto.Response::of) ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
     }
 
-    @Transactional
     suspend fun loginUser(request: UserLoginDto.Request): TokenDto =
         withContext(Dispatchers.IO) { userRepository.findByLoginIdAndRemovedFlagFalse(request.loginId) }
             ?.also {
@@ -157,7 +154,6 @@ class UserService(
             }?.let { TokenDto(jwtTokenProvider.createAccessToken(Operator(it)), it.token ?: "") }
             ?: throw RequestException400(ExceptionCode.UNJOINED_ACCOUNT)
 
-    @Transactional
     suspend fun renewToken(refreshToken: String): TokenDto =
         withContext(Dispatchers.IO) { userRepository.findById(jwtTokenProvider.getId(refreshToken)) }
             ?.also {
@@ -179,7 +175,6 @@ class UserService(
                 throw AuthenticationException401()
             } ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
 
-    @Transactional
     suspend fun logout(id: Long) {
         withContext(Dispatchers.IO) { userRepository.findById(id) }
             ?.let {
@@ -188,6 +183,7 @@ class UserService(
             } ?: throw RequestException400(ExceptionCode.UNKNOWN_USER)
     }
 
+    @Transactional(readOnly = true)
     suspend fun checkLoginId(
         loginId: String,
         id: Long?,
