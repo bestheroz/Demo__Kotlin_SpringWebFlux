@@ -138,13 +138,13 @@ class AdminService(
             ?.also {
                 if (it.removedFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
                 it.password
-                    ?.takeUnless { PasswordUtil.isPasswordValid(request.oldPassword, it) }
+                    ?.takeUnless { password -> PasswordUtil.isPasswordValid(request.oldPassword, password) }
                     ?.let {
                         log.warn("password not match")
                         throw RequestException400(ExceptionCode.INVALID_PASSWORD)
                     }
                 it.password
-                    ?.takeIf { it == request.newPassword }
+                    ?.takeIf { password -> PasswordUtil.isPasswordValid(request.newPassword, password) }
                     ?.let { throw RequestException400(ExceptionCode.CHANGE_TO_SAME_PASSWORD) }
             }?.let {
                 it.changePassword(request.newPassword, operator)
