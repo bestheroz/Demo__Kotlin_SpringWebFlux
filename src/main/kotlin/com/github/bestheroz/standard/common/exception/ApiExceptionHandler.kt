@@ -2,6 +2,7 @@ package com.github.bestheroz.standard.common.exception
 
 import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.response.ApiResult
+import com.github.bestheroz.standard.common.response.ApiResult.Companion.of
 import com.github.bestheroz.standard.common.response.Result
 import com.github.bestheroz.standard.common.util.LogUtils
 import org.springframework.dao.DuplicateKeyException
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.server.MethodNotAllowedException
@@ -40,7 +42,7 @@ class ApiExceptionHandler {
     @ExceptionHandler(RequestException400::class)
     fun requestException400(e: RequestException400): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(ResponseEntity.badRequest().body(ApiResult.of(e.exceptionCode, e.data)))
+        return Mono.just(ResponseEntity.badRequest().body(of(e.exceptionCode, e.data)))
     }
 
     @ExceptionHandler(AuthenticationException401::class)
@@ -49,36 +51,33 @@ class ApiExceptionHandler {
     ): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
         val builder = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        if (e.exceptionCode == ExceptionCode.EXPIRED_TOKEN) {
-            builder.header("token", "must-renew")
+        when (e.exceptionCode) {
+            ExceptionCode.EXPIRED_TOKEN -> builder.header("token", "must-renew")
+            ExceptionCode.MISSING_AUTHENTICATION ->
+                log.error("@CurrentUser annotation used without proper authentication")
+            else -> {}
         }
-        return Mono.just(builder.body(ApiResult.of(e.exceptionCode, e.data)))
+        return Mono.just(builder.body(of(e.exceptionCode, e.data)))
     }
 
     @ExceptionHandler(AuthorityException403::class)
     fun authorityException403(e: AuthorityException403): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(
-            ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResult.of(e.exceptionCode, e.data)),
-        )
+        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).body(of(e.exceptionCode, e.data)))
     }
 
     @ExceptionHandler(AuthorizationDeniedException::class, AccessDeniedException::class)
     fun authorizationDeniedException(e: AccessDeniedException): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
         return Mono.just(
-            ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(ApiResult.of(ExceptionCode.UNKNOWN_AUTHORITY)),
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(of(ExceptionCode.UNKNOWN_AUTHORITY)),
         )
     }
 
     @ExceptionHandler(SystemException500::class)
     fun systemException500(e: SystemException500): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
-        return Mono.just(
-            ResponseEntity.internalServerError().body(ApiResult.of(e.exceptionCode, e.data)),
-        )
+        return Mono.just(ResponseEntity.internalServerError().body(of(e.exceptionCode, e.data)))
     }
 
     @ExceptionHandler(IllegalArgumentException::class, IllegalStateException::class)
@@ -86,7 +85,7 @@ class ApiExceptionHandler {
         log.warn(LogUtils.getStackTrace(e))
         return ResponseEntity
             .status(HttpStatus.UNPROCESSABLE_ENTITY)
-            .body(ApiResult.of(ExceptionCode.INVALID_PARAMETER))
+            .body(of(ExceptionCode.INVALID_PARAMETER))
     }
 
     @ExceptionHandler(UsernameNotFoundException::class)
@@ -108,5 +107,18 @@ class ApiExceptionHandler {
     fun duplicateKeyException(e: DuplicateKeyException): Mono<ResponseEntity<ApiResult<*>>> {
         log.warn(LogUtils.getStackTrace(e))
         return Mono.just(ResponseEntity.badRequest().build())
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun methodArgumentNotValidException(
+        e: MethodArgumentNotValidException,
+    ): ResponseEntity<ApiResult<*>> {
+        log.warn(LogUtils.getStackTrace(e))
+        val errors =
+            e.bindingResult.fieldErrors.joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
+        log.warn("Validation failed: $errors")
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(of(ExceptionCode.INVALID_PARAMETER, errors))
     }
 }
