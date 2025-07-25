@@ -6,7 +6,7 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface HealthRepository : CoroutineCrudRepository<Admin, Long?> {
+interface HealthRepository : CoroutineCrudRepository<Admin, Long> {
     @Query(value = "select now()")
     fun selectNow()
 }
