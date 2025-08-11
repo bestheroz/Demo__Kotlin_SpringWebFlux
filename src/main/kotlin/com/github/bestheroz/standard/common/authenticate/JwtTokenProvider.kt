@@ -26,6 +26,7 @@ class JwtTokenProvider(
 ) {
     companion object {
         private val log = logger()
+        private const val REFRESH_TOKEN_GRACE_PERIOD_SECONDS = 3L
     }
 
     private val algorithm: Algorithm = Algorithm.HMAC512(secret)
@@ -94,7 +95,7 @@ class JwtTokenProvider(
         try {
             Instant
                 .now()
-                .plusSeconds(3)
+                .plusSeconds(REFRESH_TOKEN_GRACE_PERIOD_SECONDS)
                 .isBefore(
                     JWT
                         .require(algorithm)

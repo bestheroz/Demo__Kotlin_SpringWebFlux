@@ -140,8 +140,8 @@ class AdminService(
                 if (it.removedFlag) throw RequestException400(ExceptionCode.UNKNOWN_ADMIN)
                 it.password
                     ?.takeUnless { password -> PasswordUtil.isPasswordValid(request.oldPassword, password) }
-                    ?.let {
-                        log.warn("password not match")
+                    ?.let { _ ->
+                        log.warn("Invalid password attempt for admin ID: {}", id)
                         throw RequestException400(ExceptionCode.INVALID_PASSWORD)
                     }
                 it.password
@@ -163,7 +163,7 @@ class AdminService(
             it.password
                 ?.takeUnless { PasswordUtil.isPasswordValid(request.password, it) }
                 ?.let {
-                    log.warn("password not match")
+                    log.warn("Login failed for admin: {}", request.loginId)
                     throw RequestException400(ExceptionCode.INVALID_PASSWORD)
                 }
         }?.let {
