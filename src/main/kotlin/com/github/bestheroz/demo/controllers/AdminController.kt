@@ -56,7 +56,7 @@ class AdminController(
             ),
     )
     suspend fun renewToken(
-        @Schema(description = "리플래시 토큰") @RequestHeader(value = "AuthorizationR") refreshToken: String,
+        @Schema(description = "리플래시 토큰") @RequestHeader(value = "Authorization") refreshToken: String,
     ): TokenDto = adminService.renewToken(refreshToken)
 
     @PostMapping
