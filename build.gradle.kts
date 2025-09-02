@@ -35,7 +35,6 @@ dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib"))
-    implementation("com.google.dagger:dagger-compiler:2.57.1")
     ksp("com.google.dagger:dagger-compiler:2.57.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
