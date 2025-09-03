@@ -7,7 +7,6 @@ import com.github.bestheroz.demo.repository.OperatorHelperUserRepository
 import com.github.bestheroz.standard.common.domain.IdCreated
 import com.github.bestheroz.standard.common.domain.IdCreatedUpdated
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
@@ -25,8 +24,8 @@ class OperatorHelper(
 
             collectIds(operators, adminIds, userIds, true)
 
-            val adminMapDeferred = async(Dispatchers.IO) { fetchAdminMap(adminIds) }
-            val userMapDeferred = async(Dispatchers.IO) { fetchUserMap(userIds) }
+            val adminMapDeferred = async { fetchAdminMap(adminIds) }
+            val userMapDeferred = async { fetchUserMap(userIds) }
 
             setOperatorData(operators, adminMapDeferred.await(), userMapDeferred.await(), true)
 
@@ -43,8 +42,8 @@ class OperatorHelper(
 
             collectIds(operators, adminIds, userIds, false)
 
-            val adminMapDeferred = async(Dispatchers.IO) { fetchAdminMap(adminIds) }
-            val userMapDeferred = async(Dispatchers.IO) { fetchUserMap(userIds) }
+            val adminMapDeferred = async { fetchAdminMap(adminIds) }
+            val userMapDeferred = async { fetchUserMap(userIds) }
 
             setOperatorData(
                 operators,

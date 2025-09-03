@@ -3,6 +3,8 @@ package com.github.bestheroz.demo.repository.custom
 import com.github.bestheroz.demo.domain.Admin
 import com.github.bestheroz.demo.dtos.admin.AdminDto
 import com.github.bestheroz.standard.common.domain.service.OperatorHelper
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -18,19 +20,33 @@ class AdminRepositoryCustomImpl(
     override suspend fun findAllWithConditions(
         request: AdminDto.Request,
         pageable: Pageable,
-    ): Page<Admin> {
-        val criteria = buildCriteria(request)
-        val query = Query.query(criteria).with(pageable)
+    ): Page<Admin> =
+        coroutineScope {
+            val criteria = buildCriteria(request)
+            val query = Query.query(criteria).with(pageable)
 
-        val content =
-            template.select(Admin::class.java).matching(query).all().collectList().awaitSingle().apply {
-                operatorHelper.fulfilOperator(this)
-            }
+            // 두 쿼리를 병렬로 실행
+            val contentDeferred =
+                async {
+                    template
+                        .select(Admin::class.java)
+                        .matching(query)
+                        .all()
+                        .collectList()
+                        .awaitSingle()
+                }
 
-        val total = template.count(Query.query(criteria), Admin::class.java).awaitSingle()
+            val totalDeferred =
+                async {
+                    template.count(Query.query(criteria), Admin::class.java).awaitSingle()
+                }
 
-        return PageImpl(content, pageable, total)
-    }
+            // 두 결과를 모두 기다린 후 처리
+            val content = contentDeferred.await().apply { operatorHelper.fulfilOperator(this) }
+            val total = totalDeferred.await()
+
+            PageImpl(content, pageable, total)
+        }
 
     private fun buildCriteria(request: AdminDto.Request): Criteria {
         var criteria = Criteria.where("removed_flag").`is`(false)
