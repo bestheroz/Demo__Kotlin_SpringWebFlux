@@ -10,9 +10,9 @@ import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
-import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.data.domain.PageRequest
@@ -28,7 +28,7 @@ class UserService(
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
     companion object {
-        private val log = logger()
+        private val logger = KotlinLogging.logger {}
     }
 
     suspend fun getUserList(request: UserDto.Request): ListResult<UserDto.Response> {
@@ -130,7 +130,7 @@ class UserService(
                 it.password
                     ?.takeUnless { password -> PasswordUtil.isPasswordValid(request.oldPassword, password) }
                     ?.let {
-                        log.warn("password not match")
+                        logger.warn { "password not match" }
                         throw RequestException400(ExceptionCode.INVALID_PASSWORD)
                     }
                 it.password
@@ -152,7 +152,7 @@ class UserService(
                 it.password
                     ?.takeUnless { password -> PasswordUtil.isPasswordValid(request.password, password) }
                     ?.let {
-                        log.warn("password not match")
+                        logger.warn { "password not match" }
                         throw RequestException400(ExceptionCode.INVALID_PASSWORD)
                     }
             }?.let {

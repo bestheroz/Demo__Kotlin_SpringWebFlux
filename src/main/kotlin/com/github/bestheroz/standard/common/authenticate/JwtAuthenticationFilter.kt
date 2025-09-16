@@ -1,7 +1,7 @@
 package com.github.bestheroz.standard.common.authenticate
 
-import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.config.SecurityConfig
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -23,10 +23,7 @@ class JwtAuthenticationFilter(
     private val jwtTokenProvider: JwtTokenProvider,
 ) : WebFilter {
     companion object {
-        private const val REQUEST_COMPLETE_EXECUTE_TIME =
-            "{} ....... Request Complete Execute Time ....... : {} ms"
-        private const val REQUEST_PARAMETERS = "<{}>{}?{}"
-        private val log = logger()
+        private val logger = KotlinLogging.logger {}
     }
 
     private val publicGetPaths = SecurityConfig.GET_PUBLIC.map { PathPatternParser().parse(it) }
@@ -45,12 +42,9 @@ class JwtAuthenticationFilter(
         }
 
         if (!requestPath.startsWith("/api/v1/health/")) {
-            log.info(
-                REQUEST_PARAMETERS,
-                request.method,
-                requestPath,
-                StringUtils.defaultString(request.uri.query),
-            )
+            logger.info {
+                "<${request.method}>$requestPath?${StringUtils.defaultString(request.uri.query)}"
+            }
         }
 
         val startTime = Instant.now()
@@ -65,9 +59,11 @@ class JwtAuthenticationFilter(
             }.doFinally {
                 val duration = Duration.between(startTime, Instant.now()).toMillis()
                 if (!requestPath.startsWith("/api/v1/health/")) {
-                    log.info(REQUEST_COMPLETE_EXECUTE_TIME, requestPath, duration)
+                    logger.info {
+                        "$requestPath ....... Request Complete Execute Time ....... : $duration ms"
+                    }
                 }
-            }.doOnError { error -> log.error("Filter error: ", error) }
+            }.doOnError { error -> logger.error(error) { "Filter error" } }
     }
 
     private fun authenticateRequest(
@@ -77,11 +73,11 @@ class JwtAuthenticationFilter(
         val token = jwtTokenProvider.resolveAccessToken(exchange.request)
 
         return if (token == null) {
-            log.info("No access token found")
+            logger.info { "No access token found" }
             exchange.response.statusCode = HttpStatus.UNAUTHORIZED
             Mono.empty()
         } else if (!jwtTokenProvider.validateToken(token)) {
-            log.info("Invalid access token - refresh token required")
+            logger.info { "Invalid access token - refresh token required" }
             exchange.response.statusCode = HttpStatus.UNAUTHORIZED
             Mono.empty()
         } else {

@@ -1,5 +1,6 @@
 package com.github.bestheroz.standard.common.log
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.lang3.StringUtils
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
@@ -13,10 +14,7 @@ import reactor.core.publisher.Mono
 @Component
 class TraceLogger {
     companion object {
-        private val log = logger()
-        private const val STR_START_EXECUTE_TIME = "{} START ......."
-        private const val STR_END_EXECUTE_TIME = "{} E N D [{}ms]"
-        private const val STR_END_EXECUTE_TIME_FOR_EXCEPTION = "{} THROW [{}ms]"
+        private val logger = KotlinLogging.logger {}
     }
 
     @Around(
@@ -39,7 +37,7 @@ class TraceLogger {
 
         val stopWatch = StopWatch(signature)
         stopWatch.start()
-        log.info(STR_START_EXECUTE_TIME, signature)
+        logger.info { "$signature START ......." }
 
         return try {
             val result = pjp.proceed()
@@ -49,25 +47,25 @@ class TraceLogger {
                     result
                         .doOnSuccess {
                             stopWatch.stop()
-                            log.info(STR_END_EXECUTE_TIME, signature, stopWatch.totalTimeMillis)
+                            logger.info { "$signature E N D [${stopWatch.totalTimeMillis}ms]" }
                         }.doOnError {
                             stopWatch.stop()
-                            log.info(STR_END_EXECUTE_TIME_FOR_EXCEPTION, signature, stopWatch.totalTimeMillis)
+                            logger.info { "$signature THROW [${stopWatch.totalTimeMillis}ms]" }
                         }
                 }
                 is Flux<*> -> {
                     result
                         .doOnComplete {
                             stopWatch.stop()
-                            log.info(STR_END_EXECUTE_TIME, signature, stopWatch.totalTimeMillis)
+                            logger.info { "$signature E N D [${stopWatch.totalTimeMillis}ms]" }
                         }.doOnError {
                             stopWatch.stop()
-                            log.info(STR_END_EXECUTE_TIME_FOR_EXCEPTION, signature, stopWatch.totalTimeMillis)
+                            logger.info { "$signature THROW [${stopWatch.totalTimeMillis}ms]" }
                         }
                 }
                 else -> {
                     stopWatch.stop()
-                    log.info(STR_END_EXECUTE_TIME, signature, stopWatch.totalTimeMillis)
+                    logger.info { "$signature E N D [${stopWatch.totalTimeMillis}ms]" }
                     result
                 }
             }
@@ -75,7 +73,7 @@ class TraceLogger {
             if (stopWatch.isRunning) {
                 stopWatch.stop()
             }
-            log.info(STR_END_EXECUTE_TIME_FOR_EXCEPTION, signature, stopWatch.totalTimeMillis)
+            logger.info { "$signature THROW [${stopWatch.totalTimeMillis}ms]" }
             throw e
         }
     }

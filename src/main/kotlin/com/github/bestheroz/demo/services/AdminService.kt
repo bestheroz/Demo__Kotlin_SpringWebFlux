@@ -14,9 +14,9 @@ import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
 import com.github.bestheroz.standard.common.exception.RequestException400
-import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.PasswordUtil
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.data.domain.PageRequest
@@ -32,7 +32,7 @@ class AdminService(
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
     companion object {
-        private val log = logger()
+        private val logger = KotlinLogging.logger {}
     }
 
     suspend fun getAdminList(request: AdminDto.Request): ListResult<AdminDto.Response> {
@@ -142,7 +142,7 @@ class AdminService(
                 it.password
                     ?.takeUnless { password -> PasswordUtil.isPasswordValid(request.oldPassword, password) }
                     ?.let { _ ->
-                        log.warn("Invalid password attempt for admin ID: {}", id)
+                        logger.warn { "Invalid password attempt for admin ID: $id" }
                         throw RequestException400(ExceptionCode.INVALID_PASSWORD)
                     }
                 it.password
@@ -164,7 +164,7 @@ class AdminService(
                 it.password
                     ?.takeUnless { PasswordUtil.isPasswordValid(request.password, it) }
                     ?.let {
-                        log.warn("Login failed for admin: {}", request.loginId)
+                        logger.warn { "Login failed for admin: ${request.loginId}" }
                         throw RequestException400(ExceptionCode.INVALID_PASSWORD)
                     }
             }?.let {

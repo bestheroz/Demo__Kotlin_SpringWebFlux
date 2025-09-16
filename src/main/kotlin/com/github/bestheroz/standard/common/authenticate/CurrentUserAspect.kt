@@ -2,7 +2,7 @@ package com.github.bestheroz.standard.common.authenticate
 
 import com.github.bestheroz.standard.common.exception.AuthenticationException401
 import com.github.bestheroz.standard.common.exception.ExceptionCode
-import com.github.bestheroz.standard.common.log.logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono
 @Component
 class CurrentUserAspect {
     companion object {
-        private val log = logger()
+        private val logger = KotlinLogging.logger {}
     }
 
     @Around(
@@ -26,9 +26,9 @@ class CurrentUserAspect {
             .switchIfEmpty(
                 Mono.error(
                     AuthenticationException401(ExceptionCode.EXPIRED_TOKEN).also {
-                        log.error(
-                            "@CurrentUser 인증 컨텍스트 누락 - Authentication context missing for method: ${joinPoint.signature.name}",
-                        )
+                        logger.error {
+                            "@CurrentUser 인증 컨텍스트 누락 - Authentication context missing for method: ${joinPoint.signature.name}"
+                        }
                     },
                 ),
             ).flatMap { securityContext ->
@@ -38,9 +38,9 @@ class CurrentUserAspect {
                     !authentication.isAuthenticated ||
                     authentication.principal == null
                 ) {
-                    log.error(
-                        "@CurrentUser 인증 정보 누락 - Authentication missing or invalid for method: ${joinPoint.signature.name}",
-                    )
+                    logger.error {
+                        "@CurrentUser 인증 정보 누락 - Authentication missing or invalid for method: ${joinPoint.signature.name}"
+                    }
                     return@flatMap Mono.error<Any>(AuthenticationException401(ExceptionCode.EXPIRED_TOKEN))
                 }
                 // Proceed with the joinPoint

@@ -6,9 +6,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.github.bestheroz.standard.common.enums.AuthorityEnum
 import com.github.bestheroz.standard.common.enums.UserTypeEnum
-import com.github.bestheroz.standard.common.log.logger
 import com.github.bestheroz.standard.common.security.Operator
 import com.github.bestheroz.standard.common.util.LogUtils
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.core.userdetails.UserDetails
@@ -25,7 +25,7 @@ class JwtTokenProvider(
     @Value("\${jwt.refresh-token-expiration-minutes}") private val refreshTokenExpirationMinutes: Long,
 ) {
     companion object {
-        private val log = logger()
+        private val logger = KotlinLogging.logger {}
         private const val REFRESH_TOKEN_GRACE_PERIOD_SECONDS = 3L
     }
 
@@ -71,7 +71,7 @@ class JwtTokenProvider(
                     jwt.getClaim("authorities").asList(String::class.java).map(AuthorityEnum::valueOf),
                 )
             } catch (e: Exception) {
-                log.error("Token verification failed", e)
+                logger.error(e) { "Token verification failed" }
                 throw e
             }
         }
@@ -86,7 +86,7 @@ class JwtTokenProvider(
             verifyToken(token)
             return true
         } catch (e: JWTVerificationException) {
-            log.warn("Invalid JWT token: {}", e.message)
+            logger.warn { "Invalid JWT token: ${e.message}" }
             return false
         }
     }
@@ -105,8 +105,8 @@ class JwtTokenProvider(
                         .toInstant(),
                 )
         } catch (e: JWTVerificationException) {
-            log.warn("Invalid refresh token: {}", e.message)
-            log.warn(LogUtils.getStackTrace(e))
+            logger.warn { "Invalid refresh token: ${e.message}" }
+            logger.warn { LogUtils.getStackTrace(e) }
             false
         }
 
