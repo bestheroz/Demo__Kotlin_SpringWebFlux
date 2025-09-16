@@ -1,6 +1,7 @@
 package com.github.bestheroz.standard.config
 
 import com.github.bestheroz.standard.common.authenticate.JwtAuthenticationFilter
+import com.github.bestheroz.standard.common.authenticate.JwtTokenProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -19,11 +20,13 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfig(
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
     @Bean
-    fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
-        http
+    fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+        val jwtAuthenticationFilter = JwtAuthenticationFilter(jwtTokenProvider)
+
+        return http
             .csrf { it.disable() }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
@@ -36,8 +39,9 @@ class SecurityConfig(
                     .permitAll()
                     .anyExchange()
                     .authenticated()
-            }.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+            }.addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .build()
+    }
 
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
