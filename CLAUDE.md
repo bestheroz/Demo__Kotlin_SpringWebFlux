@@ -77,7 +77,19 @@ Uses R2DBC with MySQL. The configuration includes custom converters for:
 2. **Repository Pattern**: Custom repository implementations for complex queries
 3. **DTO Pattern**: Separate DTOs for different operations (create, update, response)
 4. **Exception Handling**: Global exception handler with standardized API responses
-5. **Logging**: Structured logging with correlation IDs
+5. **Logging**: Structured logging with correlation IDs using kotlin-logging-jvm
+
+### Transaction Boundaries
+
+**Correct Patterns**:
+- Controller → Service (with `@Transactional`) → Repository
+- Service (with `@Transactional`) → Helper Service (without `@Transactional`)
+- Service (with `@Transactional`) → Private methods (without `@Transactional`)
+
+**Anti-Patterns to Avoid**:
+- Service → Service (both with `@Transactional`) - causes nested transactions
+- Helper Service with `@Transactional` - violates single responsibility
+- Private methods with `@Transactional` - Spring AOP cannot intercept private methods
 
 ### Database Migration
 
@@ -94,5 +106,14 @@ Swagger UI available at `/swagger-ui.html` when running the application.
 
 - `local` - Development with external MySQL
 - `sandbox` - Sandbox environment
-- `qa` - QA environment  
+- `qa` - QA environment
 - `prod` - Production (API docs disabled)
+
+### Important Implementation Notes
+
+1. **Coroutines with R2DBC**: All repository and service methods use `suspend` functions for reactive operations
+2. **Async/Await Pattern**: Service layer uses `coroutineScope` with `async`/`await` for parallel operations (see `AdminService.updateAdmin`)
+3. **Password Security**: Uses BCrypt with `PasswordUtil` helper for password hashing and validation
+4. **Token Renewal**: Implements grace period (3 seconds) for refresh token renewal to handle concurrent requests
+5. **Custom R2DBC Converters**: Required for Enum, Boolean (MySQL byte), and Map (JSON) type conversions
+6. **Operator Pattern**: `@CurrentUser` annotation + `OperatorHelper` for handling created/updated user information in reactive context
