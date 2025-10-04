@@ -60,7 +60,7 @@ dependencies {
     implementation("io.sentry:sentry-logback:8.23.0")
 
     // OpenAPI (UI includes API dependency)
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.0-M1")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13")
 
     // Utility
     implementation("org.fusesource.jansi:jansi:2.4.2")
