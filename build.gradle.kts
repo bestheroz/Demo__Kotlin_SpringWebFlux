@@ -1,12 +1,12 @@
 import org.gradle.kotlin.dsl.invoke
 
 plugins {
-    val kotlinVersion = "2.3.0-Beta1"
+    val kotlinVersion = "2.3.0-Beta2"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.3.0"
-    id("org.springframework.boot") version "3.5.6"
+    id("com.google.devtools.ksp") version "2.3.1"
+    id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
     id("com.github.ben-manes.versions") version "0.53.0"
@@ -27,7 +27,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.6")
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.7")
     }
 }
 
@@ -56,8 +56,8 @@ dependencies {
     // Logging and Sentry
     implementation("com.auth0:java-jwt:4.5.0")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.13")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.24.0-alpha.2")
-    implementation("io.sentry:sentry-logback:8.24.0-alpha.2")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
+    implementation("io.sentry:sentry-logback:8.25.0")
 
     // OpenAPI (UI includes API dependency)
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13")
