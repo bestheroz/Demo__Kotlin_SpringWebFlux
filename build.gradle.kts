@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.3.1"
+    id("com.google.devtools.ksp") version "2.3.2"
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
@@ -56,8 +56,8 @@ dependencies {
     // Logging and Sentry
     implementation("com.auth0:java-jwt:4.5.0")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.13")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.25.0")
-    implementation("io.sentry:sentry-logback:8.25.0")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.26.0")
+    implementation("io.sentry:sentry-logback:8.26.0")
 
     // OpenAPI (UI includes API dependency)
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13")
@@ -92,7 +92,7 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     }
 
     kotlinGradle {
-        ktlint("1.7.1")
+        ktlint("1.8.0")
     }
 }
 
