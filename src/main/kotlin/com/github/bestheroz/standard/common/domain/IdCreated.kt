@@ -37,6 +37,7 @@ abstract class IdCreated {
                 createdByAdmin = Admin.of(operator)
                 createdByUser = null
             }
+
             UserTypeEnum.USER -> {
                 createdByAdmin = null
                 createdByUser = User.of(operator)
@@ -47,13 +48,16 @@ abstract class IdCreated {
     val createdBy: UserSimpleDto
         get() =
             when (createdObjectType) {
-                UserTypeEnum.ADMIN ->
+                UserTypeEnum.ADMIN -> {
                     creator?.let(UserSimpleDto::of)
                         ?: createdByAdmin?.let(UserSimpleDto::of)
                         ?: throw IllegalStateException("Neither createdByAdmin nor creator exists")
-                UserTypeEnum.USER ->
+                }
+
+                UserTypeEnum.USER -> {
                     creator?.let(UserSimpleDto::of)
                         ?: createdByUser?.let(UserSimpleDto::of)
                         ?: throw IllegalStateException("Neither createdByUser nor creator exists")
+                }
             }
 }

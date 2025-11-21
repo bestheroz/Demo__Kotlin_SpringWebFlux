@@ -89,9 +89,18 @@ class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>>
             return try {
                 val trimmed = source.trim()
                 when {
-                    trimmed.isEmpty() -> emptyList()
-                    trimmed == "[]" -> emptyList()
-                    trimmed == "null" -> emptyList()
+                    trimmed.isEmpty() -> {
+                        emptyList()
+                    }
+
+                    trimmed == "[]" -> {
+                        emptyList()
+                    }
+
+                    trimmed == "null" -> {
+                        emptyList()
+                    }
+
                     trimmed.startsWith("[") && trimmed.endsWith("]") -> {
                         val content = trimmed.substring(1, trimmed.length - 1).trim()
                         if (content.isEmpty()) {
@@ -115,6 +124,7 @@ class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>>
                                 }
                         }
                     }
+
                     else -> {
                         val enumClass =
                             Class.forName(

@@ -53,6 +53,7 @@ class TraceLogger {
                             logger.info { "$signature THROW [${stopWatch.totalTimeMillis}ms]" }
                         }
                 }
+
                 is Flux<*> -> {
                     result
                         .doOnComplete {
@@ -63,6 +64,7 @@ class TraceLogger {
                             logger.info { "$signature THROW [${stopWatch.totalTimeMillis}ms]" }
                         }
                 }
+
                 else -> {
                     stopWatch.stop()
                     logger.info { "$signature E N D [${stopWatch.totalTimeMillis}ms]" }

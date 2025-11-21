@@ -52,9 +52,14 @@ class ApiExceptionHandler {
         logger.warn { LogUtils.getStackTrace(e) }
         val builder = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         when (e.exceptionCode) {
-            ExceptionCode.EXPIRED_TOKEN -> builder.header("token", "must-renew")
-            ExceptionCode.MISSING_AUTHENTICATION ->
+            ExceptionCode.EXPIRED_TOKEN -> {
+                builder.header("token", "must-renew")
+            }
+
+            ExceptionCode.MISSING_AUTHENTICATION -> {
                 logger.error { "@CurrentUser annotation used without proper authentication" }
+            }
+
             else -> {}
         }
         return Mono.just(builder.body(of(e.exceptionCode, e.data)))
