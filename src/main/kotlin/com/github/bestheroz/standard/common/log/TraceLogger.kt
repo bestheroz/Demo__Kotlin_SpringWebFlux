@@ -45,10 +45,10 @@ class TraceLogger {
             when (result) {
                 is Mono<*> -> {
                     result
-                        .doOnSuccess {
+                        .doOnSuccess { _: Any? ->
                             stopWatch.stop()
                             logger.info { "$signature E N D [${stopWatch.totalTimeMillis}ms]" }
-                        }.doOnError {
+                        }.doOnError { _: Throwable ->
                             stopWatch.stop()
                             logger.info { "$signature THROW [${stopWatch.totalTimeMillis}ms]" }
                         }
@@ -59,7 +59,7 @@ class TraceLogger {
                         .doOnComplete {
                             stopWatch.stop()
                             logger.info { "$signature E N D [${stopWatch.totalTimeMillis}ms]" }
-                        }.doOnError {
+                        }.doOnError { _: Throwable ->
                             stopWatch.stop()
                             logger.info { "$signature THROW [${stopWatch.totalTimeMillis}ms]" }
                         }
