@@ -1,7 +1,7 @@
 import org.gradle.kotlin.dsl.invoke
 
 plugins {
-    val kotlinVersion = "2.3.0-RC"
+    val kotlinVersion = "2.3.0-RC2"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
@@ -55,8 +55,8 @@ dependencies {
     // Logging and Sentry
     implementation("com.auth0:java-jwt:4.5.0")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.13")
-    implementation("io.sentry:sentry-spring-boot-4:8.26.0")
-    implementation("io.sentry:sentry-logback:8.26.0")
+    implementation("io.sentry:sentry-spring-boot-4:8.28.0")
+    implementation("io.sentry:sentry-logback:8.28.0")
 
     // OpenAPI (UI includes API dependency)
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.0")
