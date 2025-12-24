@@ -46,12 +46,14 @@ class BooleanToByteConverter : Converter<Boolean, Byte> {
 
 @ReadingConverter
 class StringToEnumConverterFactory : ConverterFactory<String, Enum<*>> {
-    override fun <T : Enum<*>> getConverter(targetType: Class<T>): Converter<String, T> = StringToEnumConverter(targetType.enumConstants as Array<T>)
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Enum<*>> getConverter(targetType: Class<T>): Converter<String, T> =
+        StringToEnumConverter(targetType.enumConstants as Array<T>) as Converter<String, T>
 }
 
 private class StringToEnumConverter<T : Enum<*>>(
     private val values: Array<T>,
-) : Converter<String, T> {
+) : Converter<String, T?> {
     override fun convert(source: String): T? {
         if (source.isBlank()) return null
 
@@ -62,7 +64,7 @@ private class StringToEnumConverter<T : Enum<*>>(
                 trimmed == "null" -> null
                 else -> values.firstOrNull { it.name == trimmed }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
