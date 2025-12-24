@@ -47,8 +47,7 @@ class BooleanToByteConverter : Converter<Boolean, Byte> {
 @ReadingConverter
 class StringToEnumConverterFactory : ConverterFactory<String, Enum<*>> {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Enum<*>> getConverter(targetType: Class<T>): Converter<String, T> =
-        StringToEnumConverter(targetType.enumConstants as Array<T>) as Converter<String, T>
+    override fun <T : Enum<*>> getConverter(targetType: Class<T>): Converter<String, T> = StringToEnumConverter(targetType.enumConstants as Array<T>) as Converter<String, T>
 }
 
 private class StringToEnumConverter<T : Enum<*>>(
