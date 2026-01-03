@@ -12,6 +12,7 @@ This is a Kotlin Spring WebFlux demo project using reactive programming with R2D
 - `./gradlew build` - Build the project
 - `./gradlew bootRun` - Run the application (default port: 8000)
 - `./gradlew clean` - Clean build artifacts
+- `./gradlew assemble --parallel --configuration-cache --build-cache` - Optimized build
 
 ### Code Quality
 - `./gradlew spotlessCheck` - Check code formatting
@@ -20,16 +21,17 @@ This is a Kotlin Spring WebFlux demo project using reactive programming with R2D
 
 ### Testing
 - `./gradlew test` - Run all tests
-- `./gradlew testClasses` - Compile test classes
+- `./gradlew test --tests "ClassName"` - Run single test class
+- `./gradlew test --tests "ClassName.methodName"` - Run single test method
 
 ## Architecture Overview
 
 ### Core Technologies
-- **Kotlin** with coroutines for reactive programming
-- **Spring WebFlux** for reactive web layer
+- **Java 25** / **Kotlin 2.3.0** with coroutines for reactive programming
+- **Spring Boot 4.0.1** / **Spring WebFlux** for reactive web layer
 - **Spring Data R2DBC** for reactive database operations
-- **MySQL** with R2DBC driver
-- **JWT** for authentication
+- **MySQL** with R2DBC driver (io.asyncer:r2dbc-mysql)
+- **JWT** (com.auth0:java-jwt) for authentication
 - **Spring Security** for authorization
 - **Spotless** for code formatting (ktfmt + ktlint)
 
@@ -104,10 +106,10 @@ Swagger UI available at `/swagger-ui.html` when running the application.
 
 ### Environment Profiles
 
-- `local` - Development with external MySQL
-- `sandbox` - Sandbox environment
-- `qa` - QA environment
-- `prod` - Production (API docs disabled)
+- `local` - Development with external MySQL (Swagger enabled, extended token expiration)
+- `sandbox` - Sandbox environment (Swagger enabled)
+- `qa` - QA environment (Swagger enabled)
+- `prod` - Production (Swagger disabled)
 
 ### Important Implementation Notes
 
@@ -115,5 +117,12 @@ Swagger UI available at `/swagger-ui.html` when running the application.
 2. **Async/Await Pattern**: Service layer uses `coroutineScope` with `async`/`await` for parallel operations (see `AdminService.updateAdmin`)
 3. **Password Security**: Uses BCrypt with `PasswordUtil` helper for password hashing and validation
 4. **Token Renewal**: Implements grace period (3 seconds) for refresh token renewal to handle concurrent requests
-5. **Custom R2DBC Converters**: Required for Enum, Boolean (MySQL byte), and Map (JSON) type conversions
+5. **Custom R2DBC Converters**: Required for Enum, Boolean (MySQL byte), and Map (JSON) type conversions (see `R2dbcConfig.kt`)
 6. **Operator Pattern**: `@CurrentUser` annotation + `OperatorHelper` for handling created/updated user information in reactive context
+
+### CI/CD
+
+GitHub Actions workflows in `.github/workflows/`:
+- `test.yml` - Runs spotlessCheck and build on push (excludes sandbox/qa branches)
+- `deploy.yml` - Deployment workflow
+- `commit-and-push-version.yml` - Version management
