@@ -65,16 +65,18 @@ class OperatorHelper(
     ) {
         for (operator in operators) {
             if (operator.createdObjectType == UserTypeEnum.ADMIN) {
-                adminIds.add(operator.createdObjectId!!)
+                adminIds.add(checkNotNull(operator.createdObjectId) { "createdObjectId must not be null" })
             } else if (operator.createdObjectType == UserTypeEnum.USER) {
-                userIds.add(operator.createdObjectId!!)
+                userIds.add(checkNotNull(operator.createdObjectId) { "createdObjectId must not be null" })
             }
 
             if (includeUpdated && operator is IdCreatedUpdated) {
                 if (operator.updatedObjectType == UserTypeEnum.ADMIN) {
-                    adminIds.add(operator.updatedObjectId!!)
+                    adminIds.add(
+                        checkNotNull(operator.updatedObjectId) { "createdObjectId must not be null" },
+                    )
                 } else if (operator.updatedObjectType == UserTypeEnum.USER) {
-                    userIds.add(operator.updatedObjectId!!)
+                    userIds.add(checkNotNull(operator.updatedObjectId) { "createdObjectId must not be null" })
                 }
             }
         }
@@ -84,14 +86,18 @@ class OperatorHelper(
         if (adminIds.isEmpty()) {
             emptyMap()
         } else {
-            adminRepository.findAllByIdIn(adminIds).associateBy { it.id!! }
+            adminRepository.findAllByIdIn(adminIds).associateBy {
+                checkNotNull(it.id) { "Admin ID must not be null" }
+            }
         }
 
     private suspend fun fetchUserMap(userIds: Set<Long>): Map<Long, User> =
         if (userIds.isEmpty()) {
             emptyMap()
         } else {
-            userRepository.findAllByIdIn(userIds).associateBy { it.id!! }
+            userRepository.findAllByIdIn(userIds).associateBy {
+                checkNotNull(it.id) { "User ID must not be null" }
+            }
         }
 
     private fun setOperatorData(
