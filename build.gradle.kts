@@ -1,7 +1,7 @@
 import org.gradle.kotlin.dsl.invoke
 
 plugins {
-    val kotlinVersion = "2.3.0"
+    val kotlinVersion = "2.3.20-Beta1"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
@@ -35,7 +35,7 @@ dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib"))
-    ksp("com.google.dagger:dagger-compiler:2.57.2")
+    ksp("com.google.dagger:dagger-compiler:2.58")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Coroutines
@@ -54,9 +54,9 @@ dependencies {
 
     // Logging and Sentry
     implementation("com.auth0:java-jwt:4.5.0")
-    implementation("io.github.oshai:kotlin-logging-jvm:7.0.14")
-    implementation("io.sentry:sentry-spring-boot-4:8.29.0")
-    implementation("io.sentry:sentry-logback:8.29.0")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.00-beta-04")
+    implementation("io.sentry:sentry-spring-boot-4:8.30.0")
+    implementation("io.sentry:sentry-logback:8.30.0")
 
     // OpenAPI (UI includes API dependency)
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.1")
