@@ -35,7 +35,7 @@ dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib"))
-    ksp("com.google.dagger:dagger-compiler:2.59")
+    ksp("com.google.dagger:dagger-compiler:2.59.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Coroutines
@@ -53,10 +53,10 @@ dependencies {
     implementation("io.asyncer:r2dbc-mysql:1.4.1")
 
     // Logging and Sentry
-    implementation("com.auth0:java-jwt:4.5.0")
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.00-beta-04")
-    implementation("io.sentry:sentry-spring-boot-4:8.31.0")
-    implementation("io.sentry:sentry-logback:8.31.0")
+    implementation("com.auth0:java-jwt:4.5.1")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
+    implementation("io.sentry:sentry-spring-boot-4:8.32.0")
+    implementation("io.sentry:sentry-logback:8.32.0")
 
     // OpenAPI (UI includes API dependency)
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.1")
