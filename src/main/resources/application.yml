@@ -1,13 +1,8 @@
 spring:
   profiles:
     active: local
-  servlet:
-    multipart:
-      enabled: false
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
+  codec:
+    max-in-memory-size: 10MB
   web:
     resources:
       chain:
@@ -26,10 +21,6 @@ server:
     enabled: true
   http2:
     enabled: true
-  servlet:
-    session:
-      cookie:
-        name: JSESSIONID_DEMO
 decorator:
   datasource:
     p6spy:
@@ -48,7 +39,7 @@ spring:
     activate:
       on-profile: local
   r2dbc:
-    url: r2dbc:mysql://stkim.ddns.net:3306/studydb?useSSL=false&serverTimezone=UTC&zeroDateTimeBehavior=convertToNull
+    url: r2dbc:mysql://dev.baot.co.kr:3306/studydb?useSSL=false&serverTimezone=UTC&zeroDateTimeBehavior=convertToNull
     username: studydb
     password: studydb%#123
     pool:
