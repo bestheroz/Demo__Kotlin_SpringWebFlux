@@ -3,7 +3,6 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("com.google.devtools.ksp") version "2.3.6"
     id("org.springframework.boot") version "4.1.0-M2"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.3.0"
@@ -33,7 +32,6 @@ dependencyManagement {
 dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
-    ksp("com.google.dagger:dagger-compiler:2.59.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Coroutines
@@ -57,9 +55,6 @@ dependencies {
 
     // OpenAPI (UI includes API dependency)
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.2")
-
-    // Utility
-    implementation("org.fusesource.jansi:jansi:2.4.2")
 }
 
 kotlin {

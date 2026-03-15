@@ -82,7 +82,8 @@
       "mcp__plugin_oh-my-claudecode_t__state_clear",
       "Bash(./gradlew --version 2>/dev/null | head -5)",
       "Bash(./gradlew spotlessApply --no-daemon 2>&1)",
-      "Bash(./gradlew clean:*)"
+      "Bash(./gradlew clean:*)",
+      "Bash(./gradlew dependencies:*)"
     ],
     "deny": [
       "Bash(git push:*)",
