@@ -10,10 +10,8 @@ import org.springframework.data.convert.CustomConversions.StoreConversions
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
 import org.springframework.data.r2dbc.convert.R2dbcCustomConversions
-import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 
 @Configuration
-@EnableR2dbcRepositories
 class R2dbcConfig(
     private val objectMapper: ObjectMapper,
 ) {

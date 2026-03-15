@@ -48,12 +48,4 @@ data class Operator(
     override fun getPassword(): String? = null
 
     override fun getUsername(): String = loginId
-
-    override fun isAccountNonExpired(): Boolean = true
-
-    override fun isAccountNonLocked(): Boolean = true
-
-    override fun isCredentialsNonExpired(): Boolean = true
-
-    override fun isEnabled(): Boolean = true
 }

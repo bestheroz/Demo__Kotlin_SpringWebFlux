@@ -37,11 +37,7 @@
 
   <!-- 공통 logger 설정 -->
   <logger name="org.springframework" level="INFO"/>
-  <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor"
-          level="INFO"/>
-  <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
-          level="WARN"/>
-  <logger name="logging.level.org.springframework.web.filter" level="DEBUG"/>
+  <logger name="org.springframework.web.reactive" level="INFO"/>
   <logger name="_org.springframework.web" level="INFO"/>
   <logger name="org.flywaydb.core" level="INFO"/>
   <logger name="org.apache.commons.beanutils" level="INFO"/>

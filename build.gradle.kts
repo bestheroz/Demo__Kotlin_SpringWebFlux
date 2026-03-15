@@ -22,6 +22,7 @@ java {
 }
 
 repositories {
+    maven("https://repo.spring.io/milestone")
     mavenCentral()
 }
 
@@ -67,7 +68,7 @@ dependencies {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
     }
 }
 tasks.withType<JavaCompile> {
