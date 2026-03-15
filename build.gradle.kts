@@ -65,6 +65,7 @@ dependencies {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+        progressiveMode.set(true)
     }
 }
 tasks.withType<JavaCompile> {
@@ -76,7 +77,7 @@ tasks.bootJar {
 }
 
 tasks.bootRun {
-    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    jvmArgs("--enable-native-access=ALL-UNNAMED", "-XX:+UseZGC")
 }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {

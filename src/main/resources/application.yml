@@ -1,18 +1,8 @@
 spring:
   profiles:
     active: local
-  threads:
-    virtual:
-      enabled: true
   codec:
     max-in-memory-size: 10MB
-  web:
-    resources:
-      chain:
-        compressed: true
-  jackson:
-    serialization:
-      FAIL_ON_EMPTY_BEANS: false
 springdoc:
   api-docs:
     enabled: false
@@ -44,6 +34,8 @@ spring:
       max-size: 3
       min-idle: 2
       initial-size: 2
+      max-life-time: 30m
+      max-idle-time: 10m
 springdoc:
   api-docs:
     enabled: true
@@ -72,6 +64,8 @@ spring:
       max-size: 5
       min-idle: 3
       initial-size: 3
+      max-life-time: 30m
+      max-idle-time: 10m
 springdoc:
   api-docs:
     enabled: true
@@ -94,6 +88,8 @@ spring:
       max-size: 10
       min-idle: 5
       initial-size: 5
+      max-life-time: 30m
+      max-idle-time: 10m
 springdoc:
   api-docs:
     enabled: true
@@ -114,5 +110,7 @@ spring:
       max-size: 30
       min-idle: 10
       initial-size: 10
+      max-life-time: 30m
+      max-idle-time: 10m
 sentry:
   environment: prod

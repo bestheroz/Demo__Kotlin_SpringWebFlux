@@ -58,7 +58,7 @@ class OperatorHelper(
     suspend fun <T : IdCreated> fulfilCreatedOperator(operator: T): T = fulfilCreatedOperator(listOf(operator)).first()
 
     private fun collectIds(
-        operators: List<out IdCreated>,
+        operators: List<IdCreated>,
         adminIds: MutableSet<Long>,
         userIds: MutableSet<Long>,
         includeUpdated: Boolean,
@@ -101,7 +101,7 @@ class OperatorHelper(
         }
 
     private fun setOperatorData(
-        operators: List<out IdCreated>,
+        operators: List<IdCreated>,
         adminMap: Map<Long, Admin>,
         userMap: Map<Long, User>,
         includeUpdated: Boolean,

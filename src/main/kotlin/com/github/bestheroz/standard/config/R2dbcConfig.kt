@@ -79,9 +79,11 @@ class EnumToStringConverter : Converter<Enum<*>, String> {
 
 @ReadingConverter
 class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>> {
+    @Suppress("UNCHECKED_CAST")
     override fun <T : List<Enum<*>>> getConverter(targetType: Class<T>): Converter<String, T> = StringToEnumListConverter() as Converter<String, T>
 
     private class StringToEnumListConverter : Converter<String, List<Enum<*>>> {
+        @Suppress("UNCHECKED_CAST")
         override fun convert(source: String): List<Enum<*>> {
             if (source.isBlank()) return emptyList()
 
@@ -110,7 +112,6 @@ class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>>
                                 .map { it.trim().replace("\"", "") }
                                 .filter { it.isNotEmpty() }
                                 .mapNotNull { enumValue ->
-                                    // 여기서 실제 Enum 타입을 찾아서 변환
                                     val enumClass =
                                         Class.forName(
                                             Thread
@@ -119,7 +120,7 @@ class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>>
                                                 .loadClass(enumValue)
                                                 .name,
                                         ) as Class<out Enum<*>>
-                                    java.lang.Enum.valueOf(enumClass as Class<out Enum<*>>, enumValue)
+                                    java.lang.Enum.valueOf(enumClass, enumValue)
                                 }
                         }
                     }
@@ -132,8 +133,7 @@ class StringToEnumListConverterFactory : ConverterFactory<String, List<Enum<*>>>
                                     .contextClassLoader
                                     .loadClass(trimmed)
                                     .name,
-                            )
-                                as Class<out Enum<*>>
+                            ) as Class<out Enum<*>>
                         listOf(java.lang.Enum.valueOf(enumClass, trimmed))
                     }
                 }
