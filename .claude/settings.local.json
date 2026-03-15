@@ -77,7 +77,9 @@
       "Bash(./gradlew check:*)",
       "Bash(./gradlew spotlessCheck:*)",
       "Bash(./gradlew build:*)",
-      "Bash(./gradlew spotlessApply 2>&1 | tail -20)"
+      "Bash(./gradlew spotlessApply 2>&1 | tail -20)",
+      "mcp__plugin_oh-my-claudecode_t__state_list_active",
+      "mcp__plugin_oh-my-claudecode_t__state_clear"
     ],
     "deny": [
       "Bash(git push:*)",

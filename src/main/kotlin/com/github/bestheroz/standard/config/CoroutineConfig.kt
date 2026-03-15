@@ -21,6 +21,8 @@ class CoroutineConfig : DisposableBean {
         CoroutineExceptionHandler { _, exception ->
             logger.error { LogUtils.getStackTrace(exception) }
         }
+
+    // Virtual Threads(Java 25) 활성화 시 Dispatchers.IO가 자동으로 virtual thread 기반으로 동작
     private val coroutineScope = CoroutineScope(job + Dispatchers.IO + exceptionHandler)
 
     @Bean fun coroutineScope(): CoroutineScope = coroutineScope

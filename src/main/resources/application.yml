@@ -1,6 +1,9 @@
 spring:
   profiles:
     active: local
+  threads:
+    virtual:
+      enabled: true
   codec:
     max-in-memory-size: 10MB
   web:
