@@ -2,7 +2,6 @@ package com.github.bestheroz.standard.common.authenticate
 
 import com.github.bestheroz.standard.config.SecurityConfig
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.apache.commons.lang3.StringUtils
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -41,7 +40,7 @@ class JwtAuthenticationFilter(
 
         if (!requestPath.startsWith("/api/v1/health/")) {
             logger.info {
-                "<${request.method}>$requestPath?${StringUtils.defaultString(request.uri.query)}"
+                "<${request.method}>$requestPath?${request.uri.query.orEmpty()}"
             }
         }
 

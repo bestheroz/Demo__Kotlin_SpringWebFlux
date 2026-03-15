@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.invoke
-
 plugins {
     val kotlinVersion = "2.3.20-RC3"
     kotlin("jvm") version kotlinVersion
@@ -35,7 +33,6 @@ dependencyManagement {
 dependencies {
     // Kotlin
     implementation(kotlin("reflect"))
-    implementation(kotlin("stdlib"))
     ksp("com.google.dagger:dagger-compiler:2.59.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
@@ -48,7 +45,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.aspectj:aspectjweaver")
-    implementation("org.apache.commons:commons-lang3")
 
     // Database
     implementation("io.asyncer:r2dbc-mysql:1.4.1")
@@ -97,8 +93,4 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     kotlinGradle {
         ktlint("1.8.0")
     }
-}
-
-configurations.compileOnly {
-    extendsFrom(configurations.annotationProcessor.get())
 }

@@ -1,7 +1,6 @@
 package com.github.bestheroz.standard.common.log
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.apache.commons.lang3.StringUtils
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -80,5 +79,5 @@ class TraceLogger {
         }
     }
 
-    private fun String.containsAny(vararg substrings: String): Boolean = StringUtils.containsAny(this, *substrings)
+    private fun String.containsAny(vararg substrings: String): Boolean = substrings.any { this.contains(it) }
 }

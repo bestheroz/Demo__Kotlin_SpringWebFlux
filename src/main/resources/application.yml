@@ -21,11 +21,6 @@ server:
     enabled: true
   http2:
     enabled: true
-decorator:
-  datasource:
-    p6spy:
-      logging: slf4j
-      multiline: true
 sentry:
   dsn:
   traces-sample-rate: 0
