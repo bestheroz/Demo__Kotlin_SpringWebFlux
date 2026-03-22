@@ -83,7 +83,8 @@
       "Bash(./gradlew --version 2>/dev/null | head -5)",
       "Bash(./gradlew spotlessApply --no-daemon 2>&1)",
       "Bash(./gradlew clean:*)",
-      "Bash(./gradlew dependencies:*)"
+      "Bash(./gradlew dependencies:*)",
+      "Bash(./gradlew dependencyUpdates --no-configuration-cache)"
     ],
     "deny": [
       "Bash(git push:*)",
