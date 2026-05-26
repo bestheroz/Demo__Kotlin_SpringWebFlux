@@ -84,7 +84,18 @@
       "Bash(./gradlew spotlessApply --no-daemon 2>&1)",
       "Bash(./gradlew clean:*)",
       "Bash(./gradlew dependencies:*)",
-      "Bash(./gradlew dependencyUpdates --no-configuration-cache)"
+      "Bash(./gradlew dependencyUpdates --no-configuration-cache)",
+      "Bash(./gradlew dependencyInsight --dependency kotlinx-coroutines-core --configuration runtimeClasspath)",
+      "Bash(./gradlew dependencyInsight --dependency netty-resolver-dns --configuration runtimeClasspath)",
+      "Bash(./gradlew dependencyInsight --dependency kotlinx-coroutines-core-jvm --configuration runtimeClasspath)",
+      "Bash(./gradlew dependencyInsight --dependency netty-resolver-dns-native-macos --configuration runtimeClasspath)",
+      "Bash(./gradlew -q resolveRuntimeClasspath)",
+      "Bash(./gradlew --refresh-dependencies dependencies --configuration runtimeClasspath -q)",
+      "Bash(/usr/libexec/java_home -V)",
+      "Bash(java -XshowSettings:properties -version)",
+      "Bash(./gradlew -I /tmp/check-netty.gradle.kts -q help)",
+      "Bash(./gradlew assemble *)",
+      "Bash(./gradlew -q dependencies --configuration runtimeClasspath)"
     ],
     "deny": [
       "Bash(git push:*)",
