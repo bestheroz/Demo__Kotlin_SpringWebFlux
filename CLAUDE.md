@@ -12,7 +12,7 @@ This is a Kotlin Spring WebFlux demo project using reactive programming with R2D
 - `./gradlew build` - Build the project
 - `./gradlew bootRun` - Run the application (default port: 8000)
 - `./gradlew clean` - Clean build artifacts
-- `./gradlew assemble --parallel --configuration-cache --build-cache` - Optimized build
+- `./gradlew assemble` - Build the jar (configuration cache, build cache and parallel execution come from `gradle.properties`)
 
 ### Code Quality
 - `./gradlew spotlessCheck` - Check code formatting
@@ -24,16 +24,32 @@ This is a Kotlin Spring WebFlux demo project using reactive programming with R2D
 - `./gradlew test --tests "ClassName"` - Run single test class
 - `./gradlew test --tests "ClassName.methodName"` - Run single test method
 
+### Dependency Updates
+- `./gradlew dependencyUpdates` - Update report including BOM-managed dependencies (pre-releases included)
+- `./gradlew versionCatalogUpdate --interactive` - Write update candidates to `gradle/libs.versions.updates.toml`
+- `./gradlew versionCatalogApplyUpdates` - Apply only the entries left in that file to the catalog
+
+## Dependency Management
+
+- **Demo policy**: this repo exists to try new versions early and spot changes, so pre-releases (M/RC/Beta/Alpha/Preview) are allowed and preferred. `versionCatalogUpdate` uses the `LATEST` selector and `dependencyUpdates` sets `rejectPreReleases = false`. The `repo.spring.io/milestone` repository stays in `settings.gradle.kts` and `build.gradle.kts`; no snapshot repository is added. The Spring Boot plugin, Kotlin and the Gradle wrapper use the values shared across the Demo repos.
+- Every plugin and library coordinate lives in `gradle/libs.versions.toml`. `build.gradle.kts` references only `libs.xxx` / `alias(libs.plugins.xxx)`.
+- Coordinates that never had a version stay versionless (`{ module = "g:a" }`) and follow the Spring Boot BOM, so they move with the BOM of whatever Boot plugin version is applied.
+- Coordinates that originally carried an explicit version even though the BOM manages them (`r2dbc-mysql`) keep an explicit version on purpose, to run ahead of the BOM, and `versionCatalogUpdate` raises them to the latest version including pre-releases. An explicit version beats the BOM, so adding one to a BOM-managed coordinate is a decision to run ahead of it; otherwise leave it versionless.
+- `versionCatalogUpdate` (VCU) only updates entries that carry a version and skips versionless ones. When it rewrites the catalog, comments next to entries may be removed, so keep explanations in `build.gradle.kts` and use only `@pin` / `@keep` in the catalog.
+- If the latest version of a coordinate breaks the build and cannot be fixed, lower only that coordinate to the newest working version, mark it `# @pin`, and write the reason in `build.gradle.kts`.
+- The Kotlin JVM / Spring plugins share `[versions] kotlin`.
+- `gradle.properties` turns on the configuration cache, the build cache and parallel execution, so CI does not pass those flags. `versionCatalogUpdate` is not configuration-cache compatible and prints "Configuration cache entry discarded"; the build still succeeds.
+
 ## Architecture Overview
 
 ### Core Technologies
-- **Java 25** / **Kotlin 2.3.0** with coroutines for reactive programming
-- **Spring Boot 4.0.1** / **Spring WebFlux** for reactive web layer
+- **Java 25** / **Kotlin 2.4.20** with coroutines for reactive programming
+- **Spring Boot 4.2.0-M1** / **Spring WebFlux** for reactive web layer
 - **Spring Data R2DBC** for reactive database operations
 - **MySQL** with R2DBC driver (io.asyncer:r2dbc-mysql)
 - **JWT** (com.auth0:java-jwt) for authentication
 - **Spring Security** for authorization
-- **Spotless** for code formatting (ktfmt + ktlint)
+- **Spotless** for code formatting (ktlint)
 
 ### Project Structure
 
