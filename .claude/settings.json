@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git status --porcelain -- '*.kt' | grep -q . && ./gradlew spotlessApply -q || true",
+            "statusMessage": "spotlessApply 실행 중...",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}

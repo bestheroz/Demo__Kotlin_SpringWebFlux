@@ -1,147 +1,50 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Claude Code(claude.ai/code)가 이 저장소에서 작업할 때 따르는 지침이다.
 
-## Project Overview
+## 개발 명령
 
-This is a Kotlin Spring WebFlux demo project using reactive programming with R2DBC for database operations. It demonstrates modern Spring Boot development patterns with JWT authentication, role-based access control, and RESTful API design.
+### 빌드/실행
+- `./gradlew build` — 빌드
+- `./gradlew bootRun` — 실행 (기본 포트 8000)
+- `./gradlew assemble` — jar 생성
+- configuration cache·build cache·병렬 실행은 `gradle.properties` 에서 켜므로 CI 에서 해당 플래그를 따로 넘기지 않는다
 
-## Development Commands
+### 코드 품질
+- `./gradlew spotlessApply` — ktlint 포맷 적용. 커밋 전 필수
+- `./gradlew spotlessCheck` — 포맷 검사
+- `./gradlew check` — spotless 포함 전체 검사
 
-### Build and Run
-- `./gradlew build` - Build the project
-- `./gradlew bootRun` - Run the application (default port: 8000)
-- `./gradlew clean` - Clean build artifacts
-- `./gradlew assemble` - Build the jar (configuration cache, build cache and parallel execution come from `gradle.properties`)
+### 테스트
+- `./gradlew test` — 전체 테스트
+- `./gradlew test --tests "ClassName"` / `--tests "ClassName.methodName"` — 단건 실행
+- 현재 `src/test/` 에 테스트 파일이 하나도 없다. "테스트로 확인했다"고 말하려면 테스트를 먼저 작성한다
 
-### Code Quality
-- `./gradlew spotlessCheck` - Check code formatting
-- `./gradlew spotlessApply` - Apply code formatting fixes
-- `./gradlew check` - Run all checks including spotless
+### 의존성 업데이트
+- `./gradlew dependencyUpdates` — 업데이트 리포트 (pre-release 포함)
+- `./gradlew versionCatalogUpdate --interactive` → `./gradlew versionCatalogApplyUpdates` 순서로 적용
+- 상세 규칙은 `.claude/rules/dependency-catalog.md`
 
-### Testing
-- `./gradlew test` - Run all tests
-- `./gradlew test --tests "ClassName"` - Run single test class
-- `./gradlew test --tests "ClassName.methodName"` - Run single test method
+## 전역 컨벤션
+- 모든 plugin/library 좌표는 `gradle/libs.versions.toml` 에만 둔다. `build.gradle.kts` 는 `libs.xxx` / `alias(libs.plugins.xxx)` 만 참조한다
+- 이 저장소는 새 버전을 먼저 써보려고 만든 데모다. pre-release(M/RC/Beta/Alpha/Preview)를 허용하고 선호한다
 
-### Dependency Updates
-- `./gradlew dependencyUpdates` - Update report including BOM-managed dependencies (pre-releases included)
-- `./gradlew versionCatalogUpdate --interactive` - Write update candidates to `gradle/libs.versions.updates.toml`
-- `./gradlew versionCatalogApplyUpdates` - Apply only the entries left in that file to the catalog
+## 트랜잭션 경계
+- `@Transactional` 은 Service 진입점 한 곳에만 붙인다
+- Service → Service 호출에서 양쪽 모두 `@Transactional` 금지 — 중첩 트랜잭션이 생긴다
+- 헬퍼 Service 에 `@Transactional` 금지 — 트랜잭션 경계가 두 곳으로 갈라진다
+- private 메서드에 `@Transactional` 금지 — Spring AOP 가 프록시할 수 없어 조용히 무시된다
 
-## Dependency Management
+## 함정
+- MySQL 은 boolean 을 byte 로 돌려주고 enum·Map 도 그대로 매핑되지 않는다. 새 타입을 쓰면 `R2dbcConfig.kt` 에 커스텀 컨버터를 함께 등록해야 한다
+- refresh token 갱신에는 3초 grace period 가 있다. 동시 요청이 서로의 토큰을 무효화하는 것을 막는 장치이니 임의로 줄이거나 제거하지 않는다
+- 생성/수정자 정보는 `@CurrentUser` + `OperatorHelper` 로 주입한다. 리액티브 컨텍스트에서는 ThreadLocal 기반 조회가 동작하지 않는다
+- 병렬 조회가 필요하면 `coroutineScope` + `async`/`await` 를 쓴다 (`AdminService.updateAdmin` 참고)
+- 비밀번호는 `PasswordUtil`(BCrypt) 로만 다룬다
 
-- **Demo policy**: this repo exists to try new versions early and spot changes, so pre-releases (M/RC/Beta/Alpha/Preview) are allowed and preferred. `versionCatalogUpdate` uses the `LATEST` selector and `dependencyUpdates` sets `rejectPreReleases = false`. The `repo.spring.io/milestone` repository stays in `settings.gradle.kts` and `build.gradle.kts`; no snapshot repository is added. The Spring Boot plugin, Kotlin and the Gradle wrapper use the values shared across the Demo repos.
-- Every plugin and library coordinate lives in `gradle/libs.versions.toml`. `build.gradle.kts` references only `libs.xxx` / `alias(libs.plugins.xxx)`.
-- Coordinates that never had a version stay versionless (`{ module = "g:a" }`) and follow the Spring Boot BOM, so they move with the BOM of whatever Boot plugin version is applied.
-- Coordinates that originally carried an explicit version even though the BOM manages them (`r2dbc-mysql`) keep an explicit version on purpose, to run ahead of the BOM, and `versionCatalogUpdate` raises them to the latest version including pre-releases. An explicit version beats the BOM, so adding one to a BOM-managed coordinate is a decision to run ahead of it; otherwise leave it versionless.
-- `versionCatalogUpdate` (VCU) only updates entries that carry a version and skips versionless ones. When it rewrites the catalog, comments next to entries may be removed, so keep explanations in `build.gradle.kts` and use only `@pin` / `@keep` in the catalog.
-- If the latest version of a coordinate breaks the build and cannot be fixed, lower only that coordinate to the newest working version, mark it `# @pin`, and write the reason in `build.gradle.kts`.
-- The Kotlin JVM / Spring plugins share `[versions] kotlin`.
-- `gradle.properties` turns on the configuration cache, the build cache and parallel execution, so CI does not pass those flags. `versionCatalogUpdate` is not configuration-cache compatible and prints "Configuration cache entry discarded"; the build still succeeds.
-
-## Architecture Overview
-
-### Core Technologies
-- **Java 25** / **Kotlin 2.4.20** with coroutines for reactive programming
-- **Spring Boot 4.2.0-M1** / **Spring WebFlux** for reactive web layer
-- **Spring Data R2DBC** for reactive database operations
-- **MySQL** with R2DBC driver (io.asyncer:r2dbc-mysql)
-- **JWT** (com.auth0:java-jwt) for authentication
-- **Spring Security** for authorization
-- **Spotless** for code formatting (ktlint)
-
-### Project Structure
-
-#### Domain Layer (`demo/`)
-- **Controllers**: `AdminController`, `UserController`, `NoticeController`
-- **Domain Models**: `Admin`, `User`, `Notice`
-- **DTOs**: Separate packages for each domain with create/update/login DTOs
-- **Services**: Business logic layer
-- **Repositories**: Data access layer with custom implementations
-
-#### Standard Framework (`standard/`)
-- **Authentication**: JWT-based auth with `JwtTokenProvider` and `JwtAuthenticationFilter`
-- **Security**: Role-based access control with `AuthorityEnum` and `UserTypeEnum`
-- **Exception Handling**: Global exception handler with custom exception types
-- **Database**: R2DBC configuration with custom converters for enums and complex types
-- **Logging**: Custom logging utilities with trace support
-
-### Database Configuration
-
-Uses R2DBC with MySQL. The configuration includes custom converters for:
-- Enum to/from String conversion
-- Boolean to/from Byte conversion (MySQL compatibility)
-- JSON Map serialization/deserialization
-- Enum List handling
-
-### Security Model
-
-- JWT-based authentication with access/refresh token pattern
-- Role-based authorization with `ADMIN` and `USER` roles
-- Public endpoints configured in `SecurityConfig`
-- CORS enabled for localhost:3000
-
-### Key Configuration Files
-
-- `application.yml` - Multi-profile configuration (local/sandbox/qa/prod)
-- `R2dbcConfig.kt` - Database and custom type converters
-- `SecurityConfig.kt` - Security rules and public endpoints
-- `OpenApiConfig.kt` - Swagger/OpenAPI documentation
-
-### Development Patterns
-
-1. **Reactive Programming**: Uses Kotlin coroutines with Spring WebFlux
-2. **Repository Pattern**: Custom repository implementations for complex queries
-3. **DTO Pattern**: Separate DTOs for different operations (create, update, response)
-4. **Exception Handling**: Global exception handler with standardized API responses
-5. **Logging**: Structured logging with correlation IDs using kotlin-logging-jvm
-
-### Transaction Boundaries
-
-**Correct Patterns**:
-- Controller → Service (with `@Transactional`) → Repository
-- Service (with `@Transactional`) → Helper Service (without `@Transactional`)
-- Service (with `@Transactional`) → Private methods (without `@Transactional`)
-
-**Anti-Patterns to Avoid**:
-- Service → Service (both with `@Transactional`) - causes nested transactions
-- Helper Service with `@Transactional` - violates single responsibility
-- Private methods with `@Transactional` - Spring AOP cannot intercept private methods
-
-### Database Migration
-
-SQL migration scripts located in `migration/` directory:
-- `V1__Create_admins.sql`
-- `V2__Create_users.sql` 
-- `V3__Create_notices.sql`
-
-### API Documentation
-
-Swagger UI available at `/swagger-ui.html` when running the application.
-
-### Environment Profiles
-
-- `local` - Development with external MySQL (Swagger enabled, extended token expiration)
-- `sandbox` - Sandbox environment (Swagger enabled)
-- `qa` - QA environment (Swagger enabled)
-- `prod` - Production (Swagger disabled)
-
-### Important Implementation Notes
-
-1. **Coroutines with R2DBC**: All repository and service methods use `suspend` functions for reactive operations
-2. **Async/Await Pattern**: Service layer uses `coroutineScope` with `async`/`await` for parallel operations (see `AdminService.updateAdmin`)
-3. **Password Security**: Uses BCrypt with `PasswordUtil` helper for password hashing and validation
-4. **Token Renewal**: Implements grace period (3 seconds) for refresh token renewal to handle concurrent requests
-5. **Custom R2DBC Converters**: Required for Enum, Boolean (MySQL byte), and Map (JSON) type conversions (see `R2dbcConfig.kt`)
-6. **Operator Pattern**: `@CurrentUser` annotation + `OperatorHelper` for handling created/updated user information in reactive context
-
-### CI/CD
-
-GitHub Actions workflows in `.github/workflows/`:
-- `test.yml` - Runs spotlessCheck and build on push (excludes sandbox/qa branches)
-- `deploy.yml` - Deployment workflow
-- `commit-and-push-version.yml` - Version management
+## DB 마이그레이션
+- `migration/` 에 `V{n}__{설명}.sql` 형식으로 추가한다. 번호는 기존 최댓값 다음으로 붙인다
+- 스키마 변경은 코드 배포 전에 선적용한다
 
 ## CLAUDE.md 관리 규칙
 - 이 파일은 200줄 이하 유지. 매 세션 필요한 내용만 둔다: 빌드/테스트 명령, 전역 컨벤션, 도메인 간 의존 규칙, 함정과 그 이유
@@ -162,5 +65,5 @@ GitHub Actions workflows in `.github/workflows/`:
 - `standard/common/exception/` — 전역 예외 처리와 `ExceptionCode` 기반 응답 체계. 규칙 파일 없음
 - `standard/config/` — R2DBC 커스텀 컨버터, 시큐리티, OpenAPI 등 부트 설정. 규칙 파일 없음
 - `migration/` — MySQL 스키마 SQL(`V{n}__` 접두사). 규칙 파일 없음
-- `gradle/` — 버전 카탈로그 기반 의존성 관리(pre-release 허용 정책 포함). 규칙 파일 없음
-- `.claude/rules/claude-md-maintenance.md` — 지시 파일 작성/수정 상세 기준 (paths: 모든 CLAUDE.md / rules)
+- `gradle/`, `build.gradle.kts`, `settings.gradle.kts` — 버전 카탈로그 기반 의존성 관리. `.claude/rules/dependency-catalog.md`
+- 모든 `CLAUDE.md` / `.claude/rules/**` — 지시 파일 작성·수정 기준. `.claude/rules/claude-md-maintenance.md`
