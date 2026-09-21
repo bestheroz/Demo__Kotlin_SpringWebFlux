@@ -142,3 +142,25 @@ GitHub Actions workflows in `.github/workflows/`:
 - `test.yml` - Runs spotlessCheck and build on push (excludes sandbox/qa branches)
 - `deploy.yml` - Deployment workflow
 - `commit-and-push-version.yml` - Version management
+
+## CLAUDE.md 관리 규칙
+- 이 파일은 200줄 이하 유지. 매 세션 필요한 내용만 둔다: 빌드/테스트 명령, 전역 컨벤션, 도메인 간 의존 규칙, 함정과 그 이유
+- 코드에서 유추 가능한 내용(디렉터리 구조, 의존성 목록, 아키텍처 개요)은 쓰지 않는다
+- 지시는 검증 가능한 수준으로 구체적으로 쓴다 (X "포맷 잘 맞춰라" / O "2-space 들여쓰기")
+- 특정 도메인/경로에만 해당하는 규칙은 이 파일에 넣지 않는다
+  - 도메인이 단일 폴더로 분리돼 있으면 → 해당 폴더의 CLAUDE.md
+  - 여러 폴더에 흩어져 있으면 → `.claude/rules/<topic>.md` + `paths` frontmatter
+  - 다단계 절차는 → 스킬
+- 하위 CLAUDE.md 와 rules 에는 루트 규칙을 재진술하지 않는다. 충돌/중복 발견 시 사용자에게 알린다
+- 도메인 규칙을 분리하면 아래 "도메인 인덱스"에 한 줄 추가한다
+- 지시 파일을 추가/수정할 때는 변경 전 사용자에게 위치와 내용을 먼저 제안한다
+
+## 도메인 인덱스
+<!-- 형식: `경로/` — 한 줄 설명, 규칙 파일 위치 -->
+- `demo/` — admin·user·notice 업무 도메인. 레이어별 폴더(controllers/services/repository/dtos)에 흩어져 있어 도메인 규칙은 `.claude/rules/` + paths 로 작성한다. 규칙 파일 없음
+- `standard/common/authenticate/`, `standard/common/security/` — JWT 발급·검증과 Operator 인증 컨텍스트. 규칙 파일 없음
+- `standard/common/exception/` — 전역 예외 처리와 `ExceptionCode` 기반 응답 체계. 규칙 파일 없음
+- `standard/config/` — R2DBC 커스텀 컨버터, 시큐리티, OpenAPI 등 부트 설정. 규칙 파일 없음
+- `migration/` — MySQL 스키마 SQL(`V{n}__` 접두사). 규칙 파일 없음
+- `gradle/` — 버전 카탈로그 기반 의존성 관리(pre-release 허용 정책 포함). 규칙 파일 없음
+- `.claude/rules/claude-md-maintenance.md` — 지시 파일 작성/수정 상세 기준 (paths: 모든 CLAUDE.md / rules)
